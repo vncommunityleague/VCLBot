@@ -5,4 +5,4 @@ Bot is open-source, which means you are on your own if you want to use this for 
 
 - Credits: 
 ###### Skybot: https://github.com/Blade12629/Skybot/
-###### Tosurnament: https://github.com/SpartanPlume/Tosurnament 
+
