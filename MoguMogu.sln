@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoguMogu", "MoguMogu\MoguMogu.csproj", "{CBACB4A8-4507-4E6F-8761-4C324A150CEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoguMogu.IRC", "MoguMogu.IRC\MoguMogu.IRC.csproj", "{697B7C0F-8069-4036-80CB-E49B287372F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBACB4A8-4507-4E6F-8761-4C324A150CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBACB4A8-4507-4E6F-8761-4C324A150CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBACB4A8-4507-4E6F-8761-4C324A150CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBACB4A8-4507-4E6F-8761-4C324A150CEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{697B7C0F-8069-4036-80CB-E49B287372F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{697B7C0F-8069-4036-80CB-E49B287372F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{697B7C0F-8069-4036-80CB-E49B287372F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{697B7C0F-8069-4036-80CB-E49B287372F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
