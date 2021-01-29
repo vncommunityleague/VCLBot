@@ -24,6 +24,7 @@ namespace MoguMogu
         [JsonProperty("Osu_Api_Key")] public string OsuApi { get; set; } = "Your api key here!";
         [JsonProperty("verified_role_name")] public string RoleName { get; set; } = "177013";
         [JsonProperty("Use_MariaDB")] public bool UseMariaDB { get; set; }
+        [JsonProperty("Owner_Id")] public ulong[] OwnerID { set; get; } = { 634246091293851649, 154605183714852864};
 
         [JsonProperty("DB_Connection_String")]
         public string ConnectionString { get; set; } =

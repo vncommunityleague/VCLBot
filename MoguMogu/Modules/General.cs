@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using MoguMogu.Database;
 using MoguMogu.Database.Models;
 using OsuSharp;
@@ -16,9 +19,11 @@ namespace MoguMogu.Modules
     {
         private readonly CommandService _commands;
         private readonly OsuClient _osuClient;
+        private readonly DiscordSocketClient _discord;
 
-        public General(CommandService commands, OsuClient osuClient)
+        public General(DiscordSocketClient discord, CommandService commands, OsuClient osuClient)
         {
+            _discord = discord;
             _commands = commands;
             _osuClient = osuClient;
         }
@@ -66,6 +71,42 @@ namespace MoguMogu.Modules
                 builder.AddField($"{BotConfig.config.BotPrefix}{cmd.Name}", cmd.Summary ?? "No description", true)
                     .WithFooter(m.Commands.Count + " commands", Context.Client.CurrentUser.GetAvatarUrl());
             await Context.Channel.SendMessageAsync(embed: builder.Build());
+        }
+
+        [Command("activity")]
+        [Summary("Dit me may")]
+        public async Task activity([Remainder] string activity)
+        {
+            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
+            {
+                await _discord.SetGameAsync(activity);
+                await Context.Channel.SendMessageAsync($"Changed bot activity to: `{activity}`");
+            }
+        }
+        
+        [Command("username")]
+        [Summary("Dit me may")]
+        public async Task username([Remainder] string username)
+        {
+            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
+            {
+                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Username = username);
+                await Context.Channel.SendMessageAsync($"Changed bot username to: `{username}`");
+            }
+        }
+        
+        [Command("avatar")]
+        [Summary("Dit me may")]
+        public async Task avatar([Remainder] string url = null)
+        {
+            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
+            {
+                var a = Context.Message.Attachments.Count == 0 ? url : Context.Message.Attachments.ToList()[0].Url;
+                using var client = new WebClient();
+                await using var stream = new MemoryStream(client.DownloadData(string.IsNullOrEmpty(a) ? Context.User.GetAvatarUrl(size: 2048) : a));
+                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Avatar = new Image(stream));
+                await Context.Channel.SendMessageAsync($"Changed bot avatar!!!");
+            }
         }
 
         [Command("verify", true)]
