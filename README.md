@@ -28,3 +28,4 @@ Bot is open-source, which means you are on your own if you want to use this for 
    - `*changeactivity <new_activity>`
    - `*changeusername <new_username>` (Limited to 4 times per day)
    - `*changeavatar <link to image>`
+   - `*merge`: Merge existing verified users
