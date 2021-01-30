@@ -2,15 +2,15 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="C:\Users\Kinue\AppData\Local\JetBrains\Rider2020.2\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Kinue\AppData\Local\JetBrains\Rider2020.2\resharper-host\Local\Transient\Rider\v202\SolutionCaches\_MoguMogu.2130829849.00" t="ExcludeRecursive" />
-    <e p="C:\Users\Kinue\RiderProjects\MoguMogu" t="IncludeFlat">
+    <e p="C:\Users\Kinue\AppData\Local\JetBrains\Rider2020.2\resharper-host\Local\Transient\Rider\v202\SolutionCaches\_MoguMogu.805865137.00" t="ExcludeRecursive" />
+    <e p="C:\Users\Kinue\RiderProjects\VCLBot" t="IncludeFlat">
       <e p="MoguMogu" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
         <e p="BotConfig.cs" t="Include" />
         <e p="Database" t="Include">
-          <e p="DBCleaner.cs" t="Include" />
           <e p="DBContext.cs" t="Include" />
           <e p="Models" t="Include">
+            <e p="Result.cs" t="Include" />
             <e p="User.cs" t="Include" />
             <e p="Verification.cs" t="Include" />
           </e>
@@ -28,10 +28,17 @@
           </e>
         </e>
         <e p="Program.cs" t="Include" />
+        <e p="Schedule" t="Include">
+          <e p="Schedule.cs" t="Include" />
+        </e>
         <e p="Services" t="Include">
           <e p="CommandHandler.cs" t="Include" />
           <e p="LoggingService.cs" t="Include" />
           <e p="StartupService.cs" t="Include" />
+        </e>
+        <e p="SpreadSheets" t="Include">
+          <e p="Match.cs" t="Include" />
+          <e p="SpreadSheet.cs" t="Include" />
         </e>
       </e>
       <e p="MoguMogu.IRC" t="IncludeRecursive">

@@ -18,8 +18,8 @@ namespace MoguMogu.Modules
     public class General : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _commands;
-        private readonly OsuClient _osuClient;
         private readonly DiscordSocketClient _discord;
+        private readonly OsuClient _osuClient;
 
         public General(DiscordSocketClient discord, CommandService commands, OsuClient osuClient)
         {
@@ -83,7 +83,7 @@ namespace MoguMogu.Modules
                 await Context.Channel.SendMessageAsync($"Changed bot activity to: `{activity}`");
             }
         }
-        
+
         [Command("username")]
         [Summary("Dit me may")]
         public async Task username([Remainder] string username)
@@ -94,7 +94,7 @@ namespace MoguMogu.Modules
                 await Context.Channel.SendMessageAsync($"Changed bot username to: `{username}`");
             }
         }
-        
+
         [Command("avatar")]
         [Summary("Dit me may")]
         public async Task avatar([Remainder] string url = null)
@@ -103,9 +103,11 @@ namespace MoguMogu.Modules
             {
                 var a = Context.Message.Attachments.Count == 0 ? url : Context.Message.Attachments.ToList()[0].Url;
                 using var client = new WebClient();
-                await using var stream = new MemoryStream(client.DownloadData(string.IsNullOrEmpty(a) ? Context.User.GetAvatarUrl(size: 2048) : a));
+                await using var stream =
+                    new MemoryStream(
+                        client.DownloadData(string.IsNullOrEmpty(a) ? Context.User.GetAvatarUrl(size: 2048) : a));
                 await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Avatar = new Image(stream));
-                await Context.Channel.SendMessageAsync($"Changed bot avatar!!!");
+                await Context.Channel.SendMessageAsync("Changed bot avatar!!!");
             }
         }
 

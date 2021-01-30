@@ -23,9 +23,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="WIP LMFAO">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MoguMogu/BotConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/BotConfig.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,20 +65,27 @@
         <option value="$PROJECT_DIR$/MoguMogu/Services/LoggingService.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" />
         <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Modules/Misc.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Services/StartupService.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/User.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/BotConfig.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Modules/General.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/Schedule.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/BotConfig.cs" />
       </list>
     </option>
   </component>
   <component name="ProjectId" id="1njYUsFxQmGaE8PJx475vYNgVnh" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -118,6 +130,7 @@
       <workItem from="1611910993625" duration="16066000" />
       <workItem from="1611942044211" duration="282000" />
       <workItem from="1611942394116" duration="2242000" />
+      <workItem from="1611987838979" duration="343000" />
     </task>
     <task id="LOCAL-00001" summary="WIP LMFAO">
       <created>1611942493291</created>
@@ -144,6 +157,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
