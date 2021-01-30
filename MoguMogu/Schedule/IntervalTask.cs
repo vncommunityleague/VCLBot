@@ -3,12 +3,12 @@ using System.Timers;
 
 namespace MoguMogu.Schedule
 {
-    public abstract class Schedule
+    public abstract class IntervalTask
     {
         private readonly TimeSpan _delay;
         private Timer _timer;
 
-        protected Schedule(TimeSpan delay)
+        protected IntervalTask(TimeSpan delay)
         {
             _delay = delay;
         }

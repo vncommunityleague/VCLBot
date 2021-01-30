@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
-using Discord;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
+using MoguMogu.Data;
+using Newtonsoft.Json;
 using OsuSharp;
+using Embed = Discord.Embed;
 
 namespace MoguMogu.SpreadSheets
 {
@@ -43,6 +45,8 @@ namespace MoguMogu.SpreadSheets
                 var response = _service.Spreadsheets.Values.Get(sheetsId, $"{matchId}!B1:L")
                     .Execute();
                 var values = response.Values;
+
+                /*
                 var mpLink = GetValue(values, 3, 1);
                 var blueTeam = GetValue(values, 1, 4);
                 var redTeam = GetValue(values, 1, 6);
@@ -67,11 +71,12 @@ namespace MoguMogu.SpreadSheets
                     .WithTimestamp(mpRoom.Match.EndTime.Value);
                 builder.AddField($":trophy: **{blueTeam} | {blueScore}** - {redScore} | {redTeam}",
                     $"-------------\nRolls: \n**{blueTeam}**: {blueRoll}\n**{redTeam}**: {redRoll}\n*{(int.Parse(blueRoll) < int.Parse(redRoll) ? redTeam : blueTeam)} chọn pick và ban sau*\n-------------\nBans:\n**{redTeam}**:\n> {redBan1}{(string.IsNullOrEmpty(redBan2) ? "" : $"\n> {redBan2}")}\n\n**{blueTeam}**:\n> {blueBan1}{(string.IsNullOrEmpty(blueBan2) ? "" : $"\n> {blueBan2}")}\n-------------\nMP Link: <{mpLink}>");
-                return builder.Build();
+               */
+                
+                return JsonConvert.DeserializeObject<EmbedJson>(GetValue(values, 18, 8))?.Embed.GetEmbed();
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
                 Logger.Log($"Error when parse sheet: {matchId}!", LogLevel.Error, "Sheet");
             }
 
@@ -106,22 +111,32 @@ namespace MoguMogu.SpreadSheets
                 return string.Empty;
             }
         }
+        
 
-        private static IEnumerable<Match> GetMatches(string sheetsId)
+        public static IEnumerable<Match> GetMatches(string sheetsId)
         {
             var matches = new List<Match>();
-            var response = _service.Spreadsheets.Values.Get(sheetsId, "Schedule!B5:D").Execute();
-            var values = response.Values;
-            foreach (var row in values)
-                try
-                {
-                    matches.Add(new Match(int.Parse(row[0].ToString()!),
-                        DateTime.ParseExact($"{row[1]} {row[2]}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture)));
-                }
-                catch
-                {
-                    Logger.Log($"Can't parse: {row[0]} {row[1]} {row[2]}", LogLevel.Error, "Sheet");
-                }
+            try
+            {
+                var response = _service.Spreadsheets.Values.Get(sheetsId, "Schedule!B5:G").Execute();
+                var values = response.Values;
+                for (var i = 0; i < values.Count; i++)
+                    try
+                    {
+                        var row = values[i];
+                        matches.Add(new Match(row[0].ToString(),
+                            DateTime.ParseExact($"{row[1]} {row[2]}", "dd/MM/yyyy HH:mm",
+                                CultureInfo.InvariantCulture), GetValue(values, i, 3), GetValue(values, i, 4), GetValue(values, i, 5)));
+                    }
+                    catch
+                    {
+                        Logger.Log($"Can't parse match id {values[i][0]}", LogLevel.Error, "Sheet");
+                    }
+                
+            }
+            catch
+            {
+            }
 
             return matches;
         }

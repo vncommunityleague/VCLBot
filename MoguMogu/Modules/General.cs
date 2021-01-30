@@ -17,12 +17,26 @@ namespace MoguMogu.Modules
             _commands = commands;
         }
 
-        [Command("help", true)]
-        public async Task Help([Remainder] string arg = null)
+        [Command("prefix", true)]
+        public async Task Prefix()
         {
             await using var db = new DBContext();
             var curPrefix = Context.Guild == null
-                ? "!!"
+                ? BotConfig.config.BotPrefix
+                : db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id)?.Prefix;
+            await ReplyAsync($"My prefix is `{curPrefix}`");
+        }
+
+        [Command("help", true)]
+        [Alias("botinfo", "info")]
+        public async Task Help([Remainder] string arg = null)
+        {
+            await ReplyAsync(
+                $"<@{Context.User.Id}>, :cherry_blossom: Here you go: https://github.com/vncommunityleague/VCLBot :cherry_blossom:");
+            /*
+            await using var db = new DBContext();
+            var curPrefix = Context.Guild == null
+                ? BotConfig.config.BotPrefix
                 : db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id)?.Prefix;
             var builder = new EmbedBuilder();
             builder.WithTitle("Help me please")
@@ -57,12 +71,13 @@ namespace MoguMogu.Modules
                 if (!string.IsNullOrEmpty(parameter)) builder.AddField("Parameters", parameter);
                 await Context.Channel.SendMessageAsync(embed: builder.Build());
                 return;
-            }
+        }
 
             foreach (var cmd in m.Commands)
                 builder.AddField($"{curPrefix}{cmd.Name}", cmd.Summary ?? "No description", true)
                     .WithFooter(m.Commands.Count + " commands", Context.Client.CurrentUser.GetAvatarUrl());
             await Context.Channel.SendMessageAsync(embed: builder.Build());
+            */
         }
     }
 }

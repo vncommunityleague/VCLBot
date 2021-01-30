@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MoguMogu.Data;
 using MoguMogu.Database;
 using MoguMogu.Database.Models;
 using MoguMogu.SpreadSheets;
+using Newtonsoft.Json;
 using OsuSharp;
 
 namespace MoguMogu.Modules
@@ -61,7 +64,55 @@ namespace MoguMogu.Modules
             }
 
             await ((ISocketMessageChannel) channel).SendMessageAsync(null, false, embed);
-            await ReplyAsync("Sent result!");
+            await ReplyAsync($"<@{Context.User.Id}> Sent result!").ContinueWith(
+                async m =>
+                {
+                    await Task.Delay(7000);
+                    await m.Result.DeleteAsync();
+                });
+        }
+
+        [Command("upcoming", true)]
+        [Summary("Dit me may")]
+        public async Task UpCumming()
+        {
+            if (Context.IsPrivate) return;
+            await using var db = new DBContext();
+            var config = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
+            if (string.IsNullOrEmpty(config.SheetsId)) {
+                await ReplyAsync("Please config sheets id!");
+                return;
+            }
+            var desc = SpreadSheet.GetMatches(config.SheetsId)
+                .Where(match => match.DateTime > DateTime.UtcNow.AddHours(config.TimeOffset) && match.DateTime < DateTime.UtcNow.AddDays(-1 * (int) DateTime.UtcNow.DayOfWeek + 7).AddHours(config.TimeOffset))
+                .Aggregate("", (c, match) => c + $"{(string.IsNullOrEmpty(c) ? "" : "\n")}- Match **{match.Id}**: **{match.Team1}** vs **{match.Team2}** | **Time:** `{match.DateTime:dd/MM HH:mm}` | **Referee:** `{match.Referee}`");
+
+            await ReplyAsync(null, false, new EmbedBuilder().WithTitle("Upcoming Match").WithCurrentTimestamp().WithDescription(desc).Build());
+        }
+        [Command("embed", true)]
+        [Summary("Dit me may")]
+        public async Task Embed(ulong channelId, [Remainder]string url)
+        {
+            if (Context.IsPrivate) return;
+            await using var db = new DBContext();
+            var config = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
+            if (!Context.Guild.Roles.Any(a => a.Id == config.HostRoleId || a.Id == config.RefRoleId) &&
+                !((SocketGuildUser) Context.User).GuildPermissions.Administrator)
+                return;
+            var channel = Context.Guild.GetChannel(channelId);
+            if (channel == null)
+            {
+                await ReplyAsync($"Channel ID not found! `{channelId}`");
+                return;
+            }
+            var parse = JsonConvert.DeserializeObject<EmbedJson>(new WebClient().DownloadString(url));
+            await ((ISocketMessageChannel) channel).SendMessageAsync(parse.Content, false, parse.Embed.GetEmbed());
+            await ReplyAsync($"<@{Context.User.Id}> Sent result!").ContinueWith(
+                async m =>
+                {
+                    await Task.Delay(7000);
+                    await m.Result.DeleteAsync();
+                });
         }
 
         [Command("verify", true)]
@@ -80,10 +131,10 @@ namespace MoguMogu.Modules
                 var role = Context.Guild.Roles.FirstOrDefault(r => r.Name.ToLower().Equals("verified")) ??
                            (IRole) Context.Guild.CreateRoleAsync(config.VerifyRoleName, new GuildPermissions(37084736),
                                null, false, false).Result;
-                await gUser.AddRoleAsync(role);
                 await gUser.ModifyAsync(_177013 =>
                     _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result
                         .Username);
+                await gUser.AddRoleAsync(role);
                 return;
             }
 
@@ -115,7 +166,7 @@ namespace MoguMogu.Modules
                 crypto.GetBytes(bytes);
             }
 
-            return Regex.Replace(Guid.NewGuid().ToString("N") + Convert.ToBase64String(bytes), "[^A-Za-z0-9]", "");
+            return Regex.Replace(Guid.NewGuid().ToString("N") + Convert.ToBase64String(bytes), "[^A-Za-z0-9]", "").Substring(0, 10);
         }
     }
 }

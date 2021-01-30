@@ -37,9 +37,7 @@ namespace MoguMogu.Modules
                 await ReplyAsync(null, false, builder.Build());
                 return;
             }
-
             var cmd = array[0].ToLower();
-
             foreach (var method in config.GetType().GetMethods())
             {
                 if (!Regex.IsMatch(method.Name, "^(set|get)_") ||

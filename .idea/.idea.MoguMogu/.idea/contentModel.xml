@@ -7,10 +7,14 @@
       <e p="MoguMogu" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
         <e p="BotConfig.cs" t="Include" />
+        <e p="Data" t="Include">
+          <e p="EmbedJson.cs" t="Include" />
+        </e>
         <e p="Database" t="Include">
           <e p="DBContext.cs" t="Include" />
           <e p="Models" t="Include">
             <e p="Config.cs" t="Include" />
+            <e p="Reminder.cs" t="Include" />
             <e p="Result.cs" t="Include" />
             <e p="User.cs" t="Include" />
             <e p="Verification.cs" t="Include" />
@@ -33,7 +37,9 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Schedule" t="Include">
-          <e p="Schedule.cs" t="Include" />
+          <e p="AutoTask.cs" t="Include" />
+          <e p="CleanTask.cs" t="Include" />
+          <e p="IntervalTask.cs" t="Include" />
         </e>
         <e p="Services" t="Include">
           <e p="CommandHandler.cs" t="Include" />

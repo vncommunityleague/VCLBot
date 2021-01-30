@@ -14,7 +14,8 @@ namespace MoguMogu.Database.Models
         [Column("verify_role_name")] public string VerifyRoleName { set; get; } = "Verified";
         [Column("auto_result")] public bool AutoResult { set; get; } = false;
         [Column("result_channel_id")] public ulong ResultChannelId { set; get; } = 177013;
-        [Column("auto_schedule")] public bool AutoSchedule { set; get; } = false;
-        [Column("schedule_channel_id")] public ulong ScheduleChannelId { set; get; } = 177013;
+        [Column("auto_reminder")] public bool AutoReminder { set; get; } = false;
+        [Column("reminder_channel_id")] public ulong ReminderChannelId { set; get; } = 177013;
+        [Column("time_offset")] public int TimeOffset { set; get; } = 0;
     }
 }

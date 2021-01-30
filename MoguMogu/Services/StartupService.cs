@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using MoguMogu.Database;
 using MoguMogu.Database.Models;
+using MoguMogu.Schedule;
 
 namespace MoguMogu.Services
 {
@@ -43,8 +44,9 @@ namespace MoguMogu.Services
             foreach (var guild in Discord.Guilds)
                 if (db.Servers.FirstOrDefault(s => s.ServerId == guild.Id) == null)
                     await db.Servers.AddAsync(new Config {ServerId = guild.Id});
-
             await db.SaveChangesAsync();
+            new CleanTask().Start();
+            new AutoTask().Start();
         }
 
         public async Task StartAsync()

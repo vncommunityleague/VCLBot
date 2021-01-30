@@ -34,7 +34,9 @@ namespace MoguMogu.Services
                        (IRole) gUser.Guild.CreateRoleAsync(config.VerifyRoleName, new GuildPermissions(37084736),
                            null, false, false).Result;
             await gUser.AddRoleAsync(role);
-            await gUser.ModifyAsync(_177013 => _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result.Username);
+            await gUser.ModifyAsync(_177013 =>
+                _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result
+                    .Username);
         }
 
         private async Task OnMessageReceivedAsync(SocketMessage s)
@@ -47,7 +49,7 @@ namespace MoguMogu.Services
             await using var db = new DBContext();
             var curPrefix = msg.Channel is SocketGuildChannel
                 ? db.Servers.FirstOrDefault(s => s.ServerId == ((SocketGuildChannel) msg.Channel).Guild.Id)?.Prefix
-                : "!!";
+                : BotConfig.config.BotPrefix;
             if (msg.HasStringPrefix(curPrefix, ref argPos) ||
                 msg.HasMentionPrefix(_discord.CurrentUser, ref argPos))
             {
