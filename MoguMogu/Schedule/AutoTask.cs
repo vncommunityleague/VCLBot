@@ -15,12 +15,6 @@ namespace MoguMogu.Schedule
         {
         }
 
-        public override void Start()
-        {
-            base.Start();
-            Task.Run(OnTask);
-        }
-
         protected override void OnTask()
         {
             try
