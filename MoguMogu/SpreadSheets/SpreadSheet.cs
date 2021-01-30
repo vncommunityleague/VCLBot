@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using Discord;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
+using OsuSharp;
 
 namespace MoguMogu.SpreadSheets
 {
@@ -34,35 +36,63 @@ namespace MoguMogu.SpreadSheets
             });
         }
 
-        public static void ReadMatch()
+        public static Embed GetMatchEmbed(string matchId, string sheetsId)
         {
-            var matches = GetMatches();
-            foreach (var match in matches)
+            try
+            {
+                var response = _service.Spreadsheets.Values.Get(sheetsId, $"{matchId}!B1:L")
+                    .Execute();
+                var values = response.Values;
+                var mpLink = GetValue(values, 3, 1);
+                var blueTeam = GetValue(values, 1, 4);
+                var redTeam = GetValue(values, 1, 6);
+                var blueScore = GetValue(values, 2, 4);
+                var redScore = GetValue(values, 2, 6);
+                var blueBan1 = GetValue(values, 2, 9);
+                var blueBan2 = GetValue(values, 2, 10);
+                var redBan1 = GetValue(values, 3, 9);
+                var redBan2 = GetValue(values, 3, 10);
+                var blueRoll = GetValue(values, 14, 9);
+                var redRoll = GetValue(values, 14, 10);
+                var refName = GetRefName(matchId, sheetsId);
+                var matchTitle = $"{GetValue(values, 5, 1)} - Match {matchId}";
+                MultiplayerRoom mpRoom = null;
+                var isMatchDone = !string.IsNullOrEmpty(mpLink) &&
+                                  (mpRoom = Program.OsuClient
+                                      .GetMultiplayerRoomAsync(
+                                          long.Parse(mpLink.Substring(mpLink.LastIndexOf("/") + 1))).Result).Match
+                                  .EndTime != null;
+                if (!isMatchDone) return null;
+                var builder = new EmbedBuilder().WithTitle(matchTitle).WithFooter("Refereed by " + refName)
+                    .WithTimestamp(mpRoom.Match.EndTime.Value);
+                builder.AddField($":trophy: **{blueTeam} | {blueScore}** - {redScore} | {redTeam}",
+                    $"-------------\nRolls: \n**{blueTeam}**: {blueRoll}\n**{redTeam}**: {redRoll}\n*{(int.Parse(blueRoll) < int.Parse(redRoll) ? redTeam : blueTeam)} chọn pick và ban sau*\n-------------\nBans:\n**{redTeam}**:\n> {redBan1}{(string.IsNullOrEmpty(redBan2) ? "" : $"\n> {redBan2}")}\n\n**{blueTeam}**:\n> {blueBan1}{(string.IsNullOrEmpty(blueBan2) ? "" : $"\n> {blueBan2}")}\n-------------\nMP Link: <{mpLink}>");
+                return builder.Build();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Logger.Log($"Error when parse sheet: {matchId}!", LogLevel.Error, "Sheet");
+            }
+
+            return null;
+        }
+
+        private static string GetRefName(string matchId, string sheetsId)
+        {
+            var response = _service.Spreadsheets.Values.Get(sheetsId, "Schedule!B5:G").Execute();
+            var values = response.Values;
+            foreach (var row in values)
                 try
                 {
-                    var matchId = match.Id;
-                    var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, $"{matchId}!B1:L")
-                        .Execute();
-                    var values = response.Values;
-                    var mpLink = GetValue(values, 3, 1);
-                    var blueTeam = GetValue(values, 1, 4);
-                    var redTeam = GetValue(values, 1, 6);
-                    var blueScore = GetValue(values, 2, 4);
-                    var redScore = GetValue(values, 2, 6);
-                    var blueBan1 = GetValue(values, 2, 9);
-                    var blueBan2 = GetValue(values, 2, 10);
-                    var redBan1 = GetValue(values, 3, 9);
-                    var redBan2 = GetValue(values, 3, 10);
-                    var currentScore = GetValue(values, 10, 9);
-                    var blueRoll = GetValue(values, 14, 9);
-                    var redRoll = GetValue(values, 14, 10);
-                    var isMatchDone = currentScore.Contains("Congratulations to") &&
-                                      currentScore.Contains("for winning the match");
+                    if (row[0].ToString().Equals(matchId))
+                        return row[5].ToString();
                 }
                 catch
                 {
-                    Logger.Log($"Error when parse sheet: {match.Id}!", LogLevel.Error, "Sheet");
                 }
+
+            return string.Empty;
         }
 
         private static string GetValue(IList<IList<object>> values, int a, int b)
@@ -77,10 +107,10 @@ namespace MoguMogu.SpreadSheets
             }
         }
 
-        private static IEnumerable<Match> GetMatches()
+        private static IEnumerable<Match> GetMatches(string sheetsId)
         {
             var matches = new List<Match>();
-            var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, "Schedule!B5:D").Execute();
+            var response = _service.Spreadsheets.Values.Get(sheetsId, "Schedule!B5:D").Execute();
             var values = response.Values;
             foreach (var row in values)
                 try

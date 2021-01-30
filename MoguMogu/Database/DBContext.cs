@@ -14,6 +14,7 @@ namespace MoguMogu.Database
 
         public DbSet<Verification> Verification { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Config> Servers { get; set; }
         public DbSet<Result> Results { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

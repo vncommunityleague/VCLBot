@@ -1,0 +1,776 @@
+Index: MoguMogu/Program.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using System;\r\nusing System.Threading;\r\nusing System.Threading.Tasks;\r\nusing Discord;\r\nusing Discord.Commands;\r\nusing Discord.WebSocket;\r\nusing Microsoft.Extensions.DependencyInjection;\r\nusing MoguMogu.Database;\r\nusing MoguMogu.IRC.Irc;\r\nusing MoguMogu.Services;\r\nusing OsuSharp;\r\n\r\n//TODO Chay duoc la duoc bo deo can biet\r\nnamespace MoguMogu\r\n{\r\n    internal class Program\r\n    {\r\n        public static OsuClient OsuClient;\r\n        public static OsuIrcClient IRC;\r\n\r\n        private static void Main(string[] args)\r\n        {\r\n            OsuClient = new OsuClient(new OsuSharpConfiguration {ApiKey = BotConfig.config.OsuApi});\r\n            LoadIrc().ConfigureAwait(false);\r\n            LoadDiscord().ConfigureAwait(false);\r\n            using var db = new DBContext();\r\n            Thread.Sleep(-1);\r\n        }\r\n\r\n        private static async Task LoadIrc()\r\n        {\r\n            IRC = new OsuIrcClient();\r\n            IRC.OnWelcomeMessageReceived += (s, e) => Logger.Log(\"Welcome message received\", m: \"Irc\");\r\n            IRC.OnPrivateMessageReceived += IrcOnOnPrivateMessageReceived;\r\n            IRC.OnPrivateBanchoMessageReceived += (s, e) => Logger.Log($\"Bancho message: {e.Message}\", m: \"Irc\");\r\n            await IRC.ConnectAsync(reconnectDelay: TimeSpan.FromMinutes(60)).ConfigureAwait(false);\r\n            await IRC.LoginAsync(BotConfig.config.IrcUsername, BotConfig.config.IrcPassword).ConfigureAwait(false);\r\n            Logger.Log(\"Loaded Irc\", m: \"Irc\");\r\n        }\r\n\r\n        private static void IrcOnOnPrivateMessageReceived(object sender, IrcPrivateMessageEventArgs e)\r\n        {\r\n            Logger.Log($\"Message from {e.Sender}: {e.Message}\", m: \"Irc\");\r\n            //why bro idk??\r\n            var msg = e.Message;\r\n            if (!msg.StartsWith(BotConfig.config.IrcPrefix)) return;\r\n            msg = msg.Substring(BotConfig.config.IrcPrefix.Length);\r\n            var array = msg.Split(' ', StringSplitOptions.RemoveEmptyEntries);\r\n            switch (array[0].ToLower())\r\n            {\r\n                case \"info\":\r\n                    IRC.SendMessageAsync(e.Sender, \"Mogu mogu okayuuuuuuuuu\");\r\n                    break;\r\n                case \"verify\":\r\n                    if (array.Length < 2)\r\n                    {\r\n                        IRC.SendMessageAsync(e.Sender, \"Please input verify token!!\");\r\n                        return;\r\n                    }\r\n\r\n                    IRC.SendMessageAsync(e.Sender, \"Pending verification, please wait.....\");\r\n                    break;\r\n            }\r\n        }\r\n\r\n        private static async Task LoadDiscord()\r\n        {\r\n            var services = new ServiceCollection();\r\n            services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig\r\n                {\r\n                    LogLevel = LogSeverity.Verbose,\r\n                    MessageCacheSize = 1000\r\n                }))\r\n                .AddSingleton(new CommandService(new CommandServiceConfig\r\n                {\r\n                    LogLevel = LogSeverity.Verbose,\r\n                    DefaultRunMode = RunMode.Async\r\n                }))\r\n                .AddSingleton<CommandHandler>()\r\n                .AddSingleton<StartupService>()\r\n                .AddSingleton<LoggingService>()\r\n                .AddSingleton(OsuClient);\r\n\r\n            var provider = services.BuildServiceProvider();\r\n            provider.GetRequiredService<LoggingService>();\r\n            provider.GetRequiredService<CommandHandler>();\r\n\r\n            await provider.GetRequiredService<StartupService>().StartAsync();\r\n            Logger.Log(\"Loaded Discord\", m: \"Irc\");\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- MoguMogu/Program.cs	(revision 79685042d7489c3f27bb638f2425cbdb8c7e8956)
++++ MoguMogu/Program.cs	(date 1611996969465)
+@@ -1,4 +1,5 @@
+ using System;
++using System.Linq;
+ using System.Threading;
+ using System.Threading.Tasks;
+ using Discord;
+@@ -58,7 +59,18 @@
+                         return;
+                     }
+ 
+-                    IRC.SendMessageAsync(e.Sender, "Pending verification, please wait.....");
++                    using (var db = new DBContext())
++                    {
++                        var token = array[1];
++                        var verify = db.Verification.FirstOrDefault(t => t.Token.Equals(token));
++                        if (verify == null)
++                        {
++                            IRC.SendMessageAsync(e.Sender, "Not found your verify token!");
++                            return;
++                        }
++                        IRC.SendMessageAsync(e.Sender, "Pending verification, please wait.....");
++                        //
++                    }
+                     break;
+             }
+         }
+Index: MoguMogu/Modules/General.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using System;\r\nusing System.Globalization;\r\nusing System.IO;\r\nusing System.Linq;\r\nusing System.Net;\r\nusing System.Security.Cryptography;\r\nusing System.Text.RegularExpressions;\r\nusing System.Threading.Tasks;\r\nusing Discord;\r\nusing Discord.Commands;\r\nusing Discord.WebSocket;\r\nusing MoguMogu.Database;\r\nusing MoguMogu.Database.Models;\r\nusing OsuSharp;\r\n\r\nnamespace MoguMogu.Modules\r\n{\r\n    public class General : ModuleBase<SocketCommandContext>\r\n    {\r\n        private readonly CommandService _commands;\r\n        private readonly DiscordSocketClient _discord;\r\n        private readonly OsuClient _osuClient;\r\n\r\n        public General(DiscordSocketClient discord, CommandService commands, OsuClient osuClient)\r\n        {\r\n            _discord = discord;\r\n            _commands = commands;\r\n            _osuClient = osuClient;\r\n        }\r\n\r\n        [Command(\"help\", true)]\r\n        public async Task Help([Remainder] string arg = null)\r\n        {\r\n            await Context.Channel.DeleteMessageAsync(Context.Message).ConfigureAwait(false);\r\n            var builder = new EmbedBuilder();\r\n            builder.WithTitle(\"Help me please\")\r\n                .WithDescription($\"You can use `{BotConfig.config.BotPrefix}help <cmd/catalog>!`\")\r\n                .WithFooter(_commands.Commands.Count() + \" commands\", Context.Client.CurrentUser.GetAvatarUrl());\r\n            if (arg == null)\r\n            {\r\n                foreach (var module in _commands.Modules)\r\n                    builder.AddField($\"{module.Summary.ToLower()} {module.Name}\", $\"{module.Commands.Count} commands\",\r\n                        true);\r\n                await Context.Channel.SendMessageAsync(embed: builder.Build());\r\n                return;\r\n            }\r\n\r\n            arg = arg.ToLower();\r\n            var m = _commands.Modules.FirstOrDefault(c => c.Name.ToLower().Equals(arg));\r\n            if (m == null)\r\n            {\r\n                var cmd = _commands.Commands.FirstOrDefault(c => c.Name.ToLower().Equals(arg));\r\n                if (cmd == null)\r\n                {\r\n                    await Context.Channel.SendMessageAsync(\r\n                        $\"Not found command/catalog `{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(arg)}`\");\r\n                    return;\r\n                }\r\n\r\n                var desc = \"Description: \" + (cmd.Summary ?? \"No description\");\r\n                var parameter = cmd.Parameters.Aggregate<ParameterInfo, string>(null,\r\n                    (current, parameterInfo) =>\r\n                        $\"{(current == null ? null : current + \"\\n\")}'{parameterInfo.Name}' [{parameterInfo.Type.Name}] - {parameterInfo.Summary ?? \"No description\"}\");\r\n                builder.WithDescription(desc).WithTitle($\"Help for: {cmd.Name}\");\r\n                if (!string.IsNullOrEmpty(parameter)) builder.AddField(\"Parameters\", parameter);\r\n                await Context.Channel.SendMessageAsync(embed: builder.Build());\r\n                return;\r\n            }\r\n\r\n            foreach (var cmd in m.Commands)\r\n                builder.AddField($\"{BotConfig.config.BotPrefix}{cmd.Name}\", cmd.Summary ?? \"No description\", true)\r\n                    .WithFooter(m.Commands.Count + \" commands\", Context.Client.CurrentUser.GetAvatarUrl());\r\n            await Context.Channel.SendMessageAsync(embed: builder.Build());\r\n        }\r\n\r\n        [Command(\"activity\")]\r\n        [Summary(\"Dit me may\")]\r\n        public async Task activity([Remainder] string activity)\r\n        {\r\n            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))\r\n            {\r\n                await _discord.SetGameAsync(activity);\r\n                await Context.Channel.SendMessageAsync($\"Changed bot activity to: `{activity}`\");\r\n            }\r\n        }\r\n\r\n        [Command(\"username\")]\r\n        [Summary(\"Dit me may\")]\r\n        public async Task username([Remainder] string username)\r\n        {\r\n            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))\r\n            {\r\n                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Username = username);\r\n                await Context.Channel.SendMessageAsync($\"Changed bot username to: `{username}`\");\r\n            }\r\n        }\r\n\r\n        [Command(\"avatar\")]\r\n        [Summary(\"Dit me may\")]\r\n        public async Task avatar([Remainder] string url = null)\r\n        {\r\n            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))\r\n            {\r\n                var a = Context.Message.Attachments.Count == 0 ? url : Context.Message.Attachments.ToList()[0].Url;\r\n                using var client = new WebClient();\r\n                await using var stream =\r\n                    new MemoryStream(\r\n                        client.DownloadData(string.IsNullOrEmpty(a) ? Context.User.GetAvatarUrl(size: 2048) : a));\r\n                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Avatar = new Image(stream));\r\n                await Context.Channel.SendMessageAsync(\"Changed bot avatar!!!\");\r\n            }\r\n        }\r\n\r\n        [Command(\"verify\", true)]\r\n        [Alias(\"verification\")]\r\n        public async Task verification()\r\n        {\r\n            await using var db = new DBContext();\r\n            if (db.Users.FirstOrDefault(u => u.DiscordId == Context.User.Id) != null)\r\n            {\r\n                await Context.Channel.SendMessageAsync(\"You're verified!\");\r\n                return;\r\n            }\r\n\r\n            //verify\r\n            var dm = await Context.User.GetOrCreateDMChannelAsync();\r\n            var token = GenUniqueString();\r\n            while (db.Verification.FirstOrDefault(t => t.Token.Equals(token)) != null)\r\n                token = GenUniqueString();\r\n            await db.Verification.AddAsync(new Verification\r\n            {\r\n                Token = token,\r\n                Timestamp = DateTime.UtcNow\r\n            });\r\n            await db.SaveChangesAsync();\r\n            await dm.SendMessageAsync($\"{BotConfig.config.IrcPrefix}verify {token}\");\r\n        }\r\n\r\n        private string GenUniqueString()\r\n        {\r\n            var bytes = new byte[40];\r\n            using (var crypto = new RNGCryptoServiceProvider())\r\n            {\r\n                crypto.GetBytes(bytes);\r\n            }\r\n\r\n            return Regex.Replace(Guid.NewGuid().ToString(\"N\") + Convert.ToBase64String(bytes), \"[^A-Za-z0-9]\", \"\");\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- MoguMogu/Modules/General.cs	(revision 79685042d7489c3f27bb638f2425cbdb8c7e8956)
++++ MoguMogu/Modules/General.cs	(date 1611996457913)
+@@ -1,37 +1,24 @@
+-using System;
+ using System.Globalization;
+-using System.IO;
+ using System.Linq;
+-using System.Net;
+-using System.Security.Cryptography;
+-using System.Text.RegularExpressions;
+ using System.Threading.Tasks;
+ using Discord;
+ using Discord.Commands;
+-using Discord.WebSocket;
+-using MoguMogu.Database;
+-using MoguMogu.Database.Models;
+-using OsuSharp;
+ 
+ namespace MoguMogu.Modules
+ {
++    [Summary(":Okayu_Smile:")]
+     public class General : ModuleBase<SocketCommandContext>
+     {
+         private readonly CommandService _commands;
+-        private readonly DiscordSocketClient _discord;
+-        private readonly OsuClient _osuClient;
+ 
+-        public General(DiscordSocketClient discord, CommandService commands, OsuClient osuClient)
++        public General(CommandService commands)
+         {
+-            _discord = discord;
+             _commands = commands;
+-            _osuClient = osuClient;
+         }
+ 
+         [Command("help", true)]
+         public async Task Help([Remainder] string arg = null)
+         {
+-            await Context.Channel.DeleteMessageAsync(Context.Message).ConfigureAwait(false);
+             var builder = new EmbedBuilder();
+             builder.WithTitle("Help me please")
+                 .WithDescription($"You can use `{BotConfig.config.BotPrefix}help <cmd/catalog>!`")
+@@ -39,7 +26,7 @@
+             if (arg == null)
+             {
+                 foreach (var module in _commands.Modules)
+-                    builder.AddField($"{module.Summary.ToLower()} {module.Name}", $"{module.Commands.Count} commands",
++                    builder.AddField($"{module.Name}", $"{module.Commands.Count} commands",
+                         true);
+                 await Context.Channel.SendMessageAsync(embed: builder.Build());
+                 return;
+@@ -63,7 +50,6 @@
+                         $"{(current == null ? null : current + "\n")}'{parameterInfo.Name}' [{parameterInfo.Type.Name}] - {parameterInfo.Summary ?? "No description"}");
+                 builder.WithDescription(desc).WithTitle($"Help for: {cmd.Name}");
+                 if (!string.IsNullOrEmpty(parameter)) builder.AddField("Parameters", parameter);
+-                await Context.Channel.SendMessageAsync(embed: builder.Build());
+                 return;
+             }
+ 
+@@ -72,79 +58,5 @@
+                     .WithFooter(m.Commands.Count + " commands", Context.Client.CurrentUser.GetAvatarUrl());
+             await Context.Channel.SendMessageAsync(embed: builder.Build());
+         }
+-
+-        [Command("activity")]
+-        [Summary("Dit me may")]
+-        public async Task activity([Remainder] string activity)
+-        {
+-            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
+-            {
+-                await _discord.SetGameAsync(activity);
+-                await Context.Channel.SendMessageAsync($"Changed bot activity to: `{activity}`");
+-            }
+-        }
+-
+-        [Command("username")]
+-        [Summary("Dit me may")]
+-        public async Task username([Remainder] string username)
+-        {
+-            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
+-            {
+-                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Username = username);
+-                await Context.Channel.SendMessageAsync($"Changed bot username to: `{username}`");
+-            }
+-        }
+-
+-        [Command("avatar")]
+-        [Summary("Dit me may")]
+-        public async Task avatar([Remainder] string url = null)
+-        {
+-            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
+-            {
+-                var a = Context.Message.Attachments.Count == 0 ? url : Context.Message.Attachments.ToList()[0].Url;
+-                using var client = new WebClient();
+-                await using var stream =
+-                    new MemoryStream(
+-                        client.DownloadData(string.IsNullOrEmpty(a) ? Context.User.GetAvatarUrl(size: 2048) : a));
+-                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Avatar = new Image(stream));
+-                await Context.Channel.SendMessageAsync("Changed bot avatar!!!");
+-            }
+-        }
+-
+-        [Command("verify", true)]
+-        [Alias("verification")]
+-        public async Task verification()
+-        {
+-            await using var db = new DBContext();
+-            if (db.Users.FirstOrDefault(u => u.DiscordId == Context.User.Id) != null)
+-            {
+-                await Context.Channel.SendMessageAsync("You're verified!");
+-                return;
+-            }
+-
+-            //verify
+-            var dm = await Context.User.GetOrCreateDMChannelAsync();
+-            var token = GenUniqueString();
+-            while (db.Verification.FirstOrDefault(t => t.Token.Equals(token)) != null)
+-                token = GenUniqueString();
+-            await db.Verification.AddAsync(new Verification
+-            {
+-                Token = token,
+-                Timestamp = DateTime.UtcNow
+-            });
+-            await db.SaveChangesAsync();
+-            await dm.SendMessageAsync($"{BotConfig.config.IrcPrefix}verify {token}");
+-        }
+-
+-        private string GenUniqueString()
+-        {
+-            var bytes = new byte[40];
+-            using (var crypto = new RNGCryptoServiceProvider())
+-            {
+-                crypto.GetBytes(bytes);
+-            }
+-
+-            return Regex.Replace(Guid.NewGuid().ToString("N") + Convert.ToBase64String(bytes), "[^A-Za-z0-9]", "");
+-        }
+     }
+ }
+\ No newline at end of file
+Index: MoguMogu/Modules/Tournament.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- MoguMogu/Modules/Tournament.cs	(date 1611996812420)
++++ MoguMogu/Modules/Tournament.cs	(date 1611996812420)
+@@ -0,0 +1,81 @@
++using System;
++using System.Linq;
++using System.Security.Cryptography;
++using System.Text.RegularExpressions;
++using System.Threading.Tasks;
++using Discord;
++using Discord.Commands;
++using Discord.WebSocket;
++using MoguMogu.Database;
++using MoguMogu.Database.Models;
++using MoguMogu.SpreadSheets;
++
++namespace MoguMogu.Modules
++{
++    [Summary(":Okayu_Smile:")]
++    public class Tournament : ModuleBase<SocketCommandContext>
++    {
++        [Command("postresult")]
++        [RequireUserPermission(GuildPermission.Administrator)]
++        public async Task PostResult(ulong id, [Remainder] string matchId)
++        {
++            var channel = Context.Guild.GetChannel(id);
++            if (channel == null)
++            {
++                await ReplyAsync($"Channel ID not found! `{id}`");
++                return;
++            }
++
++            var embed = SpreadSheet.GetMatchEmbed(matchId);
++            if (embed == null)
++            {
++                await ReplyAsync($"Match not found or not finish! `{matchId}`");
++                return;
++            }
++
++            await ((ISocketMessageChannel) channel).SendMessageAsync(null, false, embed);
++            await ReplyAsync("Sent message done!");
++        }
++
++        [Command("verify", true)]
++        [Alias("verification")]
++        public async Task verification()
++        {
++            await using var db = new DBContext();
++            if (db.Users.FirstOrDefault(u => u.DiscordId == Context.User.Id) != null)
++            {
++                await Context.Channel.SendMessageAsync("You're verified!");
++                return;
++            }
++
++            //verify
++            var dm = await Context.User.GetOrCreateDMChannelAsync();
++            var token = GenUniqueString();
++            var tmp = db.Verification.FirstOrDefault(t => t.DiscordId == Context.User.Id);
++            if (tmp != null)
++                db.Verification.Remove(tmp);
++                
++            while (db.Verification.FirstOrDefault(t => t.Token.Equals(token)) != null)
++                token = GenUniqueString();
++            await db.Verification.AddAsync(new Verification
++            {
++                Token = token,
++                DiscordId = Context.User.Id,
++                Timestamp = DateTime.UtcNow
++            });
++            await db.SaveChangesAsync();
++            await dm.SendMessageAsync($"{BotConfig.config.IrcPrefix}verify {token}");
++        }
++
++        private string GenUniqueString()
++        {
++            var bytes = new byte[40];
++            using (var crypto = new RNGCryptoServiceProvider())
++            {
++                crypto.GetBytes(bytes);
++            }
++
++            return Regex.Replace(Guid.NewGuid().ToString("N") + Convert.ToBase64String(bytes), "[^A-Za-z0-9]", "");
++        }
++    }
++}
+\ No newline at end of file
+Index: .idea/.idea.MoguMogu/.idea/contentModel.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ContentModelStore\">\r\n    <e p=\"C:\\Users\\Kinue\\AppData\\Local\\JetBrains\\Rider2020.2\\extResources\" t=\"IncludeRecursive\" />\r\n    <e p=\"C:\\Users\\Kinue\\AppData\\Local\\JetBrains\\Rider2020.2\\resharper-host\\Local\\Transient\\Rider\\v202\\SolutionCaches\\_MoguMogu.805865137.00\" t=\"ExcludeRecursive\" />\r\n    <e p=\"C:\\Users\\Kinue\\RiderProjects\\VCLBot\" t=\"IncludeFlat\">\r\n      <e p=\"MoguMogu\" t=\"IncludeRecursive\">\r\n        <e p=\"bin\" t=\"ExcludeRecursive\" />\r\n        <e p=\"BotConfig.cs\" t=\"Include\" />\r\n        <e p=\"Database\" t=\"Include\">\r\n          <e p=\"DBContext.cs\" t=\"Include\" />\r\n          <e p=\"Models\" t=\"Include\">\r\n            <e p=\"Result.cs\" t=\"Include\" />\r\n            <e p=\"User.cs\" t=\"Include\" />\r\n            <e p=\"Verification.cs\" t=\"Include\" />\r\n          </e>\r\n        </e>\r\n        <e p=\"Logger.cs\" t=\"Include\" />\r\n        <e p=\"Modules\" t=\"Include\">\r\n          <e p=\"General.cs\" t=\"Include\" />\r\n        </e>\r\n        <e p=\"MoguMogu.csproj\" t=\"IncludeRecursive\" />\r\n        <e p=\"obj\" t=\"ExcludeRecursive\">\r\n          <e p=\"Debug\" t=\"Include\">\r\n            <e p=\"netcoreapp5.0\" t=\"Include\">\r\n              <e p=\"MoguMogu.AssemblyInfo.cs\" t=\"Include\" />\r\n            </e>\r\n          </e>\r\n        </e>\r\n        <e p=\"Program.cs\" t=\"Include\" />\r\n        <e p=\"Schedule\" t=\"Include\">\r\n          <e p=\"Schedule.cs\" t=\"Include\" />\r\n        </e>\r\n        <e p=\"Services\" t=\"Include\">\r\n          <e p=\"CommandHandler.cs\" t=\"Include\" />\r\n          <e p=\"LoggingService.cs\" t=\"Include\" />\r\n          <e p=\"StartupService.cs\" t=\"Include\" />\r\n        </e>\r\n        <e p=\"SpreadSheets\" t=\"Include\">\r\n          <e p=\"Match.cs\" t=\"Include\" />\r\n          <e p=\"SpreadSheet.cs\" t=\"Include\" />\r\n        </e>\r\n      </e>\r\n      <e p=\"MoguMogu.IRC\" t=\"IncludeRecursive\">\r\n        <e p=\"bin\" t=\"ExcludeRecursive\" />\r\n        <e p=\"Irc\" t=\"Include\">\r\n          <e p=\"IrcClient.cs\" t=\"Include\" />\r\n          <e p=\"IrcWelcomeMessageEventArgs.cs\" t=\"Include\" />\r\n          <e p=\"OsuIrcClient.cs\" t=\"Include\" />\r\n        </e>\r\n        <e p=\"MoguMogu.IRC.csproj\" t=\"IncludeRecursive\" />\r\n        <e p=\"obj\" t=\"ExcludeRecursive\">\r\n          <e p=\"Debug\" t=\"Include\">\r\n            <e p=\"netcoreapp5.0\" t=\"Include\">\r\n              <e p=\"MoguMogu.IRC.AssemblyInfo.cs\" t=\"Include\" />\r\n            </e>\r\n          </e>\r\n        </e>\r\n      </e>\r\n      <e p=\"MoguMogu.sln\" t=\"IncludeFlat\" />\r\n      <e p=\"packages\" t=\"ExcludeRecursive\" />\r\n    </e>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/.idea.MoguMogu/.idea/contentModel.xml	(revision 79685042d7489c3f27bb638f2425cbdb8c7e8956)
++++ .idea/.idea.MoguMogu/.idea/contentModel.xml	(date 1611996163735)
+@@ -17,7 +17,9 @@
+         </e>
+         <e p="Logger.cs" t="Include" />
+         <e p="Modules" t="Include">
++          <e p="Author.cs" t="Include" />
+           <e p="General.cs" t="Include" />
++          <e p="Tournament.cs" t="Include" />
+         </e>
+         <e p="MoguMogu.csproj" t="IncludeRecursive" />
+         <e p="obj" t="ExcludeRecursive">
+Index: .idea/.idea.MoguMogu/.idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoGeneratedRunConfigurationManager\">\r\n    <projectFile>MoguMogu/MoguMogu.csproj</projectFile>\r\n  </component>\r\n  <component name=\"BranchesTreeState\">\r\n    <expand>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"LOCAL_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"REMOTE_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"REMOTE_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"GROUP_NODE:origin\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n    </expand>\r\n    <select />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"f0971957-474b-48de-8e6a-0f4558c85644\" name=\"Default Changelist\" comment=\"WIP LMFAO\">\r\n      <change afterPath=\"$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/MoguMogu/BotConfig.cs\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/MoguMogu/BotConfig.cs\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/MoguMogu/Database/DBContext.cs\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/MoguMogu/Database/DBContext.cs\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"PUSH_AUTO_UPDATE\" value=\"true\" />\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"HighlightingSettingsPerFile\">\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/AD1AF175-F8B1-405D-8B70-29001605F5E4/76/e8117fb7/MessageExtensions.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/bd/1255e05e/Task.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/187/ModelValidator.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/ae/ce060b4b/OsuSharpConfiguration.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/9c/cf47e438/OsuClient.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/C5CF0259-C282-4AF7-8928-DBBC4B218BE1/45/9dbd0266/MySqlDbContextOptionsBuilderExtensions.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/12F/ConstructorBindingConvention.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/e3/47a789f8/Image.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/7d/5056ceca/RateLimiterConfiguration.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/8e/e82cc748/02000017.il\" root0=\"SKIP_HIGHLIGHTING\" />\r\n  </component>\r\n  <component name=\"IdeDocumentHistory\">\r\n    <option name=\"CHANGED_PATHS\">\r\n      <list>\r\n        <option value=\"$PROJECT_DIR$/MoguMogu.IRC/Class1.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu.Config/Class1.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcWelcomeMessageEventArgs.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Logger.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Services/CommandHandler.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Services/LoggingService.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Database.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Modules/Misc.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Services/StartupService.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Database/Models/User.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Program.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Modules/General.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Schedule.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/Database/DBContext.cs\" />\r\n        <option value=\"$PROJECT_DIR$/MoguMogu/BotConfig.cs\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"1njYUsFxQmGaE8PJx475vYNgVnh\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"ASKED_SHARE_PROJECT_CONFIGURATION_FILES\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"SHARE_PROJECT_CONFIGURATION_FILES\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"vue.rearranger.settings.migration\" value=\"true\" />\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"MoguMogu\" type=\"DotNetProject\" factoryName=\".NET Project\">\r\n      <option name=\"EXE_PATH\" value=\"\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"PASS_PARENT_ENVS\" value=\"1\" />\r\n      <option name=\"USE_EXTERNAL_CONSOLE\" value=\"0\" />\r\n      <option name=\"USE_MONO\" value=\"0\" />\r\n      <option name=\"RUNTIME_ARGUMENTS\" value=\"\" />\r\n      <option name=\"PROJECT_PATH\" value=\"$PROJECT_DIR$/MoguMogu/MoguMogu.csproj\" />\r\n      <option name=\"PROJECT_EXE_PATH_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_ARGUMENTS_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_WORKING_DIRECTORY_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_KIND\" value=\"DotNetCore\" />\r\n      <option name=\"PROJECT_TFM\" value=\"\" />\r\n      <method v=\"2\">\r\n        <option name=\"Build\" />\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"f0971957-474b-48de-8e6a-0f4558c85644\" name=\"Default Changelist\" comment=\"\" />\r\n      <created>1611904989817</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1611904989817</updated>\r\n      <workItem from=\"1611904999675\" duration=\"4033000\" />\r\n      <workItem from=\"1611909170630\" duration=\"1816000\" />\r\n      <workItem from=\"1611910993625\" duration=\"16066000\" />\r\n      <workItem from=\"1611942044211\" duration=\"282000\" />\r\n      <workItem from=\"1611942394116\" duration=\"2242000\" />\r\n      <workItem from=\"1611987838979\" duration=\"343000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"WIP LMFAO\">\r\n      <created>1611942493291</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1611942493292</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"2\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"UnityProjectConfiguration\" hasMinimizedUI=\"false\" />\r\n  <component name=\"UnityUnitTestConfiguration\" currentTestLauncher=\"NUnit\" />\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n    <option name=\"oldMeFiltersMigrated\" value=\"true\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <option name=\"CLEAR_INITIAL_COMMIT_MESSAGE\" value=\"true\" />\r\n    <MESSAGE value=\"WIP LMFAO\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"WIP LMFAO\" />\r\n  </component>\r\n  <component name=\"WindowStateProjectService\">\r\n    <state x=\"681\" y=\"380\" key=\"ANALYSIS_DLG_com.jetbrains.rider.actions.impl.cleanup.RiderCodeCleanupAction$actionPerformed$dlg$1\" timestamp=\"1611940775898\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state x=\"681\" y=\"380\" key=\"ANALYSIS_DLG_com.jetbrains.rider.actions.impl.cleanup.RiderCodeCleanupAction$actionPerformed$dlg$1/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611940775898\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.bottom\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.center\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.left\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.right\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.bottom\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.center\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.left\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.right\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.bottom\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.center\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.left\" timestamp=\"1611941999459\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999459\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.right\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.bottom\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.center\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.left\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.right\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.bottom\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.center\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.left\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.right\" timestamp=\"1611941999460\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state width=\"1811\" height=\"383\" key=\"GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611941999460\" />\r\n    <state x=\"519\" y=\"272\" key=\"Rider.ProjectTemplateDialog.Size\" timestamp=\"1611905168865\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state x=\"519\" y=\"272\" key=\"Rider.ProjectTemplateDialog.Size/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611905168865\" />\r\n    <state x=\"519\" y=\"269\" key=\"Vcs.Push.Dialog.v2\" timestamp=\"1611944629857\">\r\n      <screen x=\"0\" y=\"0\" width=\"1854\" height=\"1080\" />\r\n    </state>\r\n    <state x=\"519\" y=\"269\" key=\"Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080\" timestamp=\"1611944629857\" />\r\n    <state x=\"2457\" y=\"269\" key=\"Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080\" timestamp=\"1611942679111\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/.idea.MoguMogu/.idea/workspace.xml	(revision 79685042d7489c3f27bb638f2425cbdb8c7e8956)
++++ .idea/.idea.MoguMogu/.idea/workspace.xml	(date 1611996980610)
+@@ -22,15 +22,14 @@
+     <select />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="WIP LMFAO">
+-      <change afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" afterDir="false" />
++    <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="SpreadSheets :D">
++      <change afterPath="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/MoguMogu/BotConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/BotConfig.cs" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/MoguMogu/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Program.cs" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -45,13 +44,16 @@
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/AD1AF175-F8B1-405D-8B70-29001605F5E4/76/e8117fb7/MessageExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/bd/1255e05e/Task.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/187/ModelValidator.cs" root0="SKIP_HIGHLIGHTING" />
+-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/ae/ce060b4b/OsuSharpConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
+-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/9c/cf47e438/OsuClient.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/C5CF0259-C282-4AF7-8928-DBBC4B218BE1/45/9dbd0266/MySqlDbContextOptionsBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/12F/ConstructorBindingConvention.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/e3/47a789f8/Image.cs" root0="SKIP_HIGHLIGHTING" />
++    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/8e/e82cc748/02000017.il" root0="SKIP_HIGHLIGHTING" />
++    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/ae/ce060b4b/OsuSharpConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
++    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/9c/cf47e438/OsuClient.cs" root0="SKIP_HIGHLIGHTING" />
++    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/73/55d70399/EmbedBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
++    <setting file="mock://C:/Users/Kinue/RiderProjects/VCLBot/MoguMogu/Modules/General.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/7d/5056ceca/RateLimiterConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
+-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/8e/e82cc748/02000017.il" root0="SKIP_HIGHLIGHTING" />
++    <setting file="mock://C:/Users/Kinue/RiderProjects/VCLBot/MoguMogu/Database/DBContext.cs" root0="SKIP_HIGHLIGHTING" />
+   </component>
+   <component name="IdeDocumentHistory">
+     <option name="CHANGED_PATHS">
+@@ -70,15 +72,19 @@
+         <option value="$PROJECT_DIR$/MoguMogu/Services/StartupService.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/User.cs" />
+-        <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
+-        <option value="$PROJECT_DIR$/MoguMogu/Modules/General.cs" />
+-        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/Schedule.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" />
+         <option value="$PROJECT_DIR$/MoguMogu/BotConfig.cs" />
++        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/Pick.cs" />
++        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" />
++        <option value="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" />
++        <option value="$PROJECT_DIR$/MoguMogu/bin/Debug/netcoreapp5.0/config.json" />
++        <option value="$PROJECT_DIR$/MoguMogu/Modules/General.cs" />
++        <option value="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" />
++        <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
+       </list>
+     </option>
+   </component>
+@@ -92,6 +98,8 @@
+   </component>
+   <component name="PropertiesComponent">
+     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
++    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.34994584" />
++    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.30010834" />
+     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+     <property name="WebServerToolWindowFactoryState" value="false" />
+@@ -130,7 +138,7 @@
+       <workItem from="1611910993625" duration="16066000" />
+       <workItem from="1611942044211" duration="282000" />
+       <workItem from="1611942394116" duration="2242000" />
+-      <workItem from="1611987838979" duration="343000" />
++      <workItem from="1611987838979" duration="8461000" />
+     </task>
+     <task id="LOCAL-00001" summary="WIP LMFAO">
+       <created>1611942493291</created>
+@@ -139,7 +147,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1611942493292</updated>
+     </task>
+-    <option name="localTasksCounter" value="2" />
++    <task id="LOCAL-00002" summary="SpreadSheets :D">
++      <created>1611988279556</created>
++      <option name="number" value="00002" />
++      <option name="presentableId" value="LOCAL-00002" />
++      <option name="project" value="LOCAL" />
++      <updated>1611988279556</updated>
++    </task>
++    <option name="localTasksCounter" value="3" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -162,101 +177,126 @@
+   <component name="VcsManagerConfiguration">
+     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+     <MESSAGE value="WIP LMFAO" />
+-    <option name="LAST_COMMIT_MESSAGE" value="WIP LMFAO" />
++    <MESSAGE value="SpreadSheets :D" />
++    <option name="LAST_COMMIT_MESSAGE" value="SpreadSheets :D" />
+   </component>
+   <component name="WindowStateProjectService">
+-    <state x="681" y="380" key="ANALYSIS_DLG_com.jetbrains.rider.actions.impl.cleanup.RiderCodeCleanupAction$actionPerformed$dlg$1" timestamp="1611940775898">
++    <state x="681" y="380" key="ANALYSIS_DLG_com.jetbrains.rider.actions.impl.cleanup.RiderCodeCleanupAction$actionPerformed$dlg$1" timestamp="1611996143369">
+       <screen x="0" y="0" width="1854" height="1080" />
+     </state>
+-    <state x="681" y="380" key="ANALYSIS_DLG_com.jetbrains.rider.actions.impl.cleanup.RiderCodeCleanupAction$actionPerformed$dlg$1/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611940775898" />
+-    <state width="1811" height="383" key="GridCell.Tab.0.bottom" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state x="681" y="380" key="ANALYSIS_DLG_com.jetbrains.rider.actions.impl.cleanup.RiderCodeCleanupAction$actionPerformed$dlg$1/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996143369" />
++    <state width="1877" height="386" key="GridCell.Tab.0.bottom" timestamp="1611996461389">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.0.center" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428910" />
++    <state width="1877" height="386" key="GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
++    <state width="1877" height="386" key="GridCell.Tab.0.center" timestamp="1611996461389">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.0.left" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428910" />
++    <state width="1877" height="386" key="GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
++    <state width="1877" height="386" key="GridCell.Tab.0.left" timestamp="1611996461389">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.0.right" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428910" />
++    <state width="1877" height="386" key="GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
++    <state width="1877" height="386" key="GridCell.Tab.0.right" timestamp="1611996461389">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.1.bottom" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428910" />
++    <state width="1877" height="386" key="GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
++    <state width="1877" height="386" key="GridCell.Tab.1.bottom" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.1.center" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428911" />
++    <state width="1877" height="386" key="GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.1.center" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.1.left" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428910" />
++    <state width="1877" height="386" key="GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.1.left" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.1.right" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428910" />
++    <state width="1877" height="386" key="GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.1.right" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.2.bottom" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428911" />
++    <state width="1877" height="386" key="GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.2.bottom" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.2.center" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.2.center" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.2.left" timestamp="1611941999459">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.2.left" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999459" />
+-    <state width="1811" height="383" key="GridCell.Tab.2.right" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428911" />
++    <state width="1877" height="386" key="GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.2.right" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.3.bottom" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.3.bottom" timestamp="1611996461097">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.3.center" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
++    <state width="1877" height="386" key="GridCell.Tab.3.center" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.3.left" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.3.left" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.3.right" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.3.right" timestamp="1611996461096">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.4.bottom" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428912" />
++    <state width="1877" height="386" key="GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
++    <state width="1877" height="386" key="GridCell.Tab.4.bottom" timestamp="1611996461097">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.4.center" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428913" />
++    <state width="1877" height="386" key="GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
++    <state width="1877" height="386" key="GridCell.Tab.4.center" timestamp="1611996461097">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.4.left" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428913" />
++    <state width="1877" height="386" key="GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
++    <state width="1877" height="386" key="GridCell.Tab.4.left" timestamp="1611996461097">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
+-    <state width="1811" height="383" key="GridCell.Tab.4.right" timestamp="1611941999460">
+-      <screen x="0" y="0" width="1854" height="1080" />
++    <state width="1811" height="386" key="GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428913" />
++    <state width="1877" height="386" key="GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
++    <state width="1877" height="386" key="GridCell.Tab.4.right" timestamp="1611996461097">
++      <screen x="1920" y="0" width="1920" height="1080" />
+     </state>
+-    <state width="1811" height="383" key="GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611941999460" />
++    <state width="1811" height="386" key="GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996428913" />
++    <state width="1877" height="386" key="GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
+     <state x="519" y="272" key="Rider.ProjectTemplateDialog.Size" timestamp="1611905168865">
+       <screen x="0" y="0" width="1854" height="1080" />
+     </state>
+     <state x="519" y="272" key="Rider.ProjectTemplateDialog.Size/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611905168865" />
+-    <state x="519" y="269" key="Vcs.Push.Dialog.v2" timestamp="1611944629857">
++    <state x="519" y="269" key="Vcs.Push.Dialog.v2" timestamp="1611988281505">
+       <screen x="0" y="0" width="1854" height="1080" />
+     </state>
+-    <state x="519" y="269" key="Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611944629857" />
++    <state x="519" y="269" key="Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611988281505" />
+     <state x="2457" y="269" key="Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611942679111" />
++    <state x="744" y="450" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611996980595">
++      <screen x="0" y="0" width="1854" height="1080" />
++    </state>
++    <state x="744" y="450" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611996980595" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: MoguMogu/Modules/Author.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- MoguMogu/Modules/Author.cs	(date 1611996163636)
++++ MoguMogu/Modules/Author.cs	(date 1611996163636)
+@@ -0,0 +1,64 @@
++using System.IO;
++using System.Linq;
++using System.Net;
++using System.Threading.Tasks;
++using Discord;
++using Discord.Commands;
++using Discord.WebSocket;
++using OsuSharp;
++
++namespace MoguMogu.Modules
++{
++    [Summary(":Okayu_Smile:")]
++    public class Author : ModuleBase<SocketCommandContext>
++    {
++        private readonly CommandService _commands;
++        private readonly DiscordSocketClient _discord;
++        private readonly OsuClient _osuClient;
++
++        public Author(DiscordSocketClient discord, CommandService commands, OsuClient osuClient)
++        {
++            _discord = discord;
++            _commands = commands;
++            _osuClient = osuClient;
++        }
++
++        [Command("changeactivity")]
++        [Summary("Dit me may")]
++        public async Task activity([Remainder] string activity)
++        {
++            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
++            {
++                await _discord.SetGameAsync(activity);
++                await Context.Channel.SendMessageAsync($"Changed bot activity to: `{activity}`");
++            }
++        }
++
++        [Command("changeusername")]
++        [Summary("Dit me may")]
++        public async Task username([Remainder] string username)
++        {
++            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
++            {
++                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Username = username);
++                await Context.Channel.SendMessageAsync($"Changed bot username to: `{username}`");
++            }
++        }
++
++        [Command("changeavatar")]
++        [Summary("Dit me may")]
++        public async Task avatar([Remainder] string url = null)
++        {
++            if (BotConfig.config.OwnerID.Any(a => a == Context.User.Id))
++            {
++                var a = Context.Message.Attachments.Count == 0 ? url : Context.Message.Attachments.ToList()[0].Url;
++                using var client = new WebClient();
++                await using var stream =
++                    new MemoryStream(
++                        client.DownloadData(string.IsNullOrEmpty(a) ? Context.User.GetAvatarUrl(size: 2048) : a));
++                await _discord.CurrentUser.ModifyAsync(_177013 => _177013.Avatar = new Image(stream));
++                await Context.Channel.SendMessageAsync("Changed bot avatar!!!");
++            }
++        }
++    }
++}
+\ No newline at end of file
+Index: MoguMogu/SpreadSheets/SpreadSheet.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using System;\r\nusing System.Collections.Generic;\r\nusing System.Globalization;\r\nusing System.Threading;\r\nusing Google.Apis.Auth.OAuth2;\r\nusing Google.Apis.Services;\r\nusing Google.Apis.Sheets.v4;\r\nusing Google.Apis.Util.Store;\r\n\r\nnamespace MoguMogu.SpreadSheets\r\n{\r\n    public class SpreadSheet\r\n    {\r\n        private static readonly string[] Scopes = {SheetsService.Scope.SpreadsheetsReadonly};\r\n        private static readonly SheetsService _service;\r\n\r\n        static SpreadSheet()\r\n        {\r\n            var credential = GoogleWebAuthorizationBroker.AuthorizeAsync(\r\n                new ClientSecrets\r\n                {\r\n                    ClientId = BotConfig.config.Client_Id,\r\n                    ClientSecret = BotConfig.config.Client_Secret\r\n                },\r\n                Scopes,\r\n                \"user\",\r\n                CancellationToken.None,\r\n                new FileDataStore(\"token.json\", true)).Result;\r\n\r\n            _service = new SheetsService(new BaseClientService.Initializer\r\n            {\r\n                HttpClientInitializer = credential,\r\n                ApplicationName = \"177013\"\r\n            });\r\n        }\r\n\r\n        public static void ReadMatch()\r\n        {\r\n            var matches = GetMatches();\r\n            foreach (var match in matches)\r\n                try\r\n                {\r\n                    var matchId = match.Id;\r\n                    var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, $\"{matchId}!B1:L\")\r\n                        .Execute();\r\n                    var values = response.Values;\r\n                    var mpLink = GetValue(values, 3, 1);\r\n                    var blueTeam = GetValue(values, 1, 4);\r\n                    var redTeam = GetValue(values, 1, 6);\r\n                    var blueScore = GetValue(values, 2, 4);\r\n                    var redScore = GetValue(values, 2, 6);\r\n                    var blueBan1 = GetValue(values, 2, 9);\r\n                    var blueBan2 = GetValue(values, 2, 10);\r\n                    var redBan1 = GetValue(values, 3, 9);\r\n                    var redBan2 = GetValue(values, 3, 10);\r\n                    var currentScore = GetValue(values, 10, 9);\r\n                    var blueRoll = GetValue(values, 14, 9);\r\n                    var redRoll = GetValue(values, 14, 10);\r\n                    var isMatchDone = currentScore.Contains(\"Congratulations to\") &&\r\n                                      currentScore.Contains(\"for winning the match\");\r\n                }\r\n                catch\r\n                {\r\n                    Logger.Log($\"Error when parse sheet: {match.Id}!\", LogLevel.Error, \"Sheet\");\r\n                }\r\n        }\r\n\r\n        private static string GetValue(IList<IList<object>> values, int a, int b)\r\n        {\r\n            try\r\n            {\r\n                return values[a][b].ToString();\r\n            }\r\n            catch\r\n            {\r\n                return string.Empty;\r\n            }\r\n        }\r\n\r\n        private static IEnumerable<Match> GetMatches()\r\n        {\r\n            var matches = new List<Match>();\r\n            var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, \"Schedule!B5:D\").Execute();\r\n            var values = response.Values;\r\n            foreach (var row in values)\r\n                try\r\n                {\r\n                    matches.Add(new Match(int.Parse(row[0].ToString()!),\r\n                        DateTime.ParseExact($\"{row[1]} {row[2]}\", \"dd/MM/yyyy HH:mm\", CultureInfo.InvariantCulture)));\r\n                }\r\n                catch\r\n                {\r\n                    Logger.Log($\"Can't parse: {row[0]} {row[1]} {row[2]}\", LogLevel.Error, \"Sheet\");\r\n                }\r\n\r\n            return matches;\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- MoguMogu/SpreadSheets/SpreadSheet.cs	(revision 79685042d7489c3f27bb638f2425cbdb8c7e8956)
++++ MoguMogu/SpreadSheets/SpreadSheet.cs	(date 1611996163641)
+@@ -2,10 +2,12 @@
+ using System.Collections.Generic;
+ using System.Globalization;
+ using System.Threading;
++using Discord;
+ using Google.Apis.Auth.OAuth2;
+ using Google.Apis.Services;
+ using Google.Apis.Sheets.v4;
+ using Google.Apis.Util.Store;
++using OsuSharp;
+ 
+ namespace MoguMogu.SpreadSheets
+ {
+@@ -34,35 +36,63 @@
+             });
+         }
+ 
+-        public static void ReadMatch()
++        public static Embed GetMatchEmbed(string matchId)
+         {
+-            var matches = GetMatches();
+-            foreach (var match in matches)
+-                try
+-                {
+-                    var matchId = match.Id;
+-                    var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, $"{matchId}!B1:L")
+-                        .Execute();
+-                    var values = response.Values;
+-                    var mpLink = GetValue(values, 3, 1);
+-                    var blueTeam = GetValue(values, 1, 4);
+-                    var redTeam = GetValue(values, 1, 6);
+-                    var blueScore = GetValue(values, 2, 4);
+-                    var redScore = GetValue(values, 2, 6);
+-                    var blueBan1 = GetValue(values, 2, 9);
+-                    var blueBan2 = GetValue(values, 2, 10);
+-                    var redBan1 = GetValue(values, 3, 9);
+-                    var redBan2 = GetValue(values, 3, 10);
+-                    var currentScore = GetValue(values, 10, 9);
+-                    var blueRoll = GetValue(values, 14, 9);
+-                    var redRoll = GetValue(values, 14, 10);
+-                    var isMatchDone = currentScore.Contains("Congratulations to") &&
+-                                      currentScore.Contains("for winning the match");
++            try
++            {
++                var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, $"{matchId}!B1:L")
++                    .Execute();
++                var values = response.Values;
++                var mpLink = GetValue(values, 3, 1);
++                var blueTeam = GetValue(values, 1, 4);
++                var redTeam = GetValue(values, 1, 6);
++                var blueScore = GetValue(values, 2, 4);
++                var redScore = GetValue(values, 2, 6);
++                var blueBan1 = GetValue(values, 2, 9);
++                var blueBan2 = GetValue(values, 2, 10);
++                var redBan1 = GetValue(values, 3, 9);
++                var redBan2 = GetValue(values, 3, 10);
++                var blueRoll = GetValue(values, 14, 9);
++                var redRoll = GetValue(values, 14, 10);
++                var refName = GetRefName(matchId);
++                var matchTitle = $"{GetValue(values, 5, 1)} - Match {matchId}";
++                MultiplayerRoom mpRoom = null;
++                var isMatchDone = !string.IsNullOrEmpty(mpLink) &&
++                                  (mpRoom = Program.OsuClient
++                                      .GetMultiplayerRoomAsync(
++                                          long.Parse(mpLink.Substring(mpLink.LastIndexOf("/") + 1))).Result).Match
++                                  .EndTime != null;
++                if (!isMatchDone) return null;
++                var builder = new EmbedBuilder().WithTitle(matchTitle).WithFooter("Refereed by " + refName)
++                    .WithTimestamp(mpRoom.Match.EndTime.Value);
++                builder.AddField($":trophy: **{blueTeam} | {blueScore}** - {redScore} | {redTeam}",
++                    $"-------------\nRolls: \n**{blueTeam}**: {blueRoll}\n**{redTeam}**: {redRoll}\n*{(int.Parse(blueRoll) < int.Parse(redRoll) ? redTeam : blueTeam)} chọn pick và ban sau*\n-------------\nBans:\n**{redTeam}**:\n> {redBan1}{(string.IsNullOrEmpty(redBan2) ? "" : $"\n> {redBan2}")}\n\n**{blueTeam}**:\n> {blueBan1}{(string.IsNullOrEmpty(blueBan2) ? "" : $"\n> {blueBan2}")}\n-------------\nMP Link: <{mpLink}>");
++                return builder.Build();
++            }
++            catch (Exception e)
++            {
++                Console.WriteLine(e);
++                Logger.Log($"Error when parse sheet: {matchId}!", LogLevel.Error, "Sheet");
++            }
++
++            return null;
++        }
++
++        private static string GetRefName(string matchId)
++        {
++            var response = _service.Spreadsheets.Values.Get(BotConfig.config.Sheets_Id, "Schedule!B5:G").Execute();
++            var values = response.Values;
++            foreach (var row in values)
++                try
++                {
++                    if (row[0].ToString().Equals(matchId))
++                        return row[5].ToString();
+                 }
+                 catch
+                 {
+-                    Logger.Log($"Error when parse sheet: {match.Id}!", LogLevel.Error, "Sheet");
+                 }
++
++            return string.Empty;
+         }
+ 
+         private static string GetValue(IList<IList<object>> values, int a, int b)

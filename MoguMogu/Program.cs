@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -9,6 +10,7 @@ using MoguMogu.Database;
 using MoguMogu.IRC.Irc;
 using MoguMogu.Services;
 using OsuSharp;
+using User = MoguMogu.Database.Models.User;
 
 //TODO Chay duoc la duoc bo deo can biet
 namespace MoguMogu
@@ -21,9 +23,8 @@ namespace MoguMogu
         private static void Main(string[] args)
         {
             OsuClient = new OsuClient(new OsuSharpConfiguration {ApiKey = BotConfig.config.OsuApi});
-            LoadIrc().ConfigureAwait(false);
             LoadDiscord().ConfigureAwait(false);
-            using var db = new DBContext();
+            LoadIrc().ConfigureAwait(false);
             Thread.Sleep(-1);
         }
 
@@ -58,7 +59,66 @@ namespace MoguMogu
                         return;
                     }
 
-                    IRC.SendMessageAsync(e.Sender, "Pending verification, please wait.....");
+                    var osuUser = OsuClient.GetUserByUsernameAsync(e.Sender, GameMode.Standard).Result;
+                    using (var db = new DBContext())
+                    {
+                        if (db.Users.FirstOrDefault(u => u.OsuId == osuUser.UserId) != null)
+                        {
+                            IRC.SendMessageAsync(e.Sender, "Bạn đã verify rồi!");
+                            return;
+                        }
+
+                        var token = array[1];
+                        var verify = db.Verification.FirstOrDefault(t => t.Token.Equals(token));
+                        if (verify == null)
+                        {
+                            IRC.SendMessageAsync(e.Sender, "Not found your verify token!");
+                            return;
+                        }
+
+                        db.Remove(verify);
+                        db.SaveChanges();
+                        if (verify.Timestamp.AddMinutes(5) < DateTime.UtcNow)
+                        {
+                            IRC.SendMessageAsync(e.Sender, "Token expired!");
+                            return;
+                        }
+
+                        try
+                        {
+                            IRC.SendMessageAsync(e.Sender, "Pending verification, please wait.....");
+                            foreach (var guild in StartupService.Discord.Guilds)
+                                try
+                                {
+                                    var config = db.Servers.FirstOrDefault(s => s.ServerId == guild.Id);
+                                    if (!config.EnableTour) continue;
+                                    var user = guild.GetUser(verify.DiscordId);
+                                    var role = guild.Roles.FirstOrDefault(r => r.Name.ToLower().Equals("verified")) ??
+                                               (IRole) guild.CreateRoleAsync(config.VerifyRoleName,
+                                                   new GuildPermissions(37084736), null, false, false).Result;
+                                    user.AddRoleAsync(role);
+                                    user.ModifyAsync(_177013 => _177013.Nickname = osuUser.Username);
+                                }
+                                catch
+                                {
+                                }
+
+                            StartupService.Discord.GetUser(verify.DiscordId).GetOrCreateDMChannelAsync().Result
+                                .SendMessageAsync("Verified!").Wait();
+                            db.Users.Add(new User
+                            {
+                                DiscordId = verify.DiscordId,
+                                OsuId = osuUser.UserId
+                            });
+                            IRC.SendMessageAsync(e.Sender, "Verified, please check your discord!");
+                            db.SaveChanges();
+                        }
+                        catch (Exception a)
+                        {
+                            IRC.SendMessageAsync(e.Sender, "Error! Please try again later! " + a.Message);
+                        }
+                    }
+
                     break;
             }
         }

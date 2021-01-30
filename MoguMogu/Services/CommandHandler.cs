@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MoguMogu.Database;
+using OsuSharp;
 
 namespace MoguMogu.Services
 {
@@ -17,6 +21,20 @@ namespace MoguMogu.Services
             _commands = commands;
             _provider = provider;
             _discord.MessageReceived += OnMessageReceivedAsync;
+            _discord.UserJoined += DiscordOnUserJoined;
+        }
+
+        private async Task DiscordOnUserJoined(SocketGuildUser gUser)
+        {
+            await using var db = new DBContext();
+            var config = db.Servers.FirstOrDefault(s => s.ServerId == gUser.Guild.Id);
+            var user = db.Users.FirstOrDefault(u => u.DiscordId == gUser.Id);
+            if (!config.EnableTour || user == null) return;
+            var role = gUser.Guild.Roles.FirstOrDefault(r => r.Name.ToLower().Equals("verified")) ??
+                       (IRole) gUser.Guild.CreateRoleAsync(config.VerifyRoleName, new GuildPermissions(37084736),
+                           null, false, false).Result;
+            await gUser.AddRoleAsync(role);
+            await gUser.ModifyAsync(_177013 => _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result.Username);
         }
 
         private async Task OnMessageReceivedAsync(SocketMessage s)
@@ -26,7 +44,11 @@ namespace MoguMogu.Services
             var context = new SocketCommandContext(_discord, msg);
 
             var argPos = 0;
-            if (msg.HasStringPrefix(BotConfig.config.BotPrefix, ref argPos) ||
+            await using var db = new DBContext();
+            var curPrefix = msg.Channel is SocketGuildChannel
+                ? db.Servers.FirstOrDefault(s => s.ServerId == ((SocketGuildChannel) msg.Channel).Guild.Id)?.Prefix
+                : "!!";
+            if (msg.HasStringPrefix(curPrefix, ref argPos) ||
                 msg.HasMentionPrefix(_discord.CurrentUser, ref argPos))
             {
                 var result = await _commands.ExecuteAsync(context, argPos, _provider);

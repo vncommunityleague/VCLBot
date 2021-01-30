@@ -10,6 +10,7 @@
         <e p="Database" t="Include">
           <e p="DBContext.cs" t="Include" />
           <e p="Models" t="Include">
+            <e p="Config.cs" t="Include" />
             <e p="Result.cs" t="Include" />
             <e p="User.cs" t="Include" />
             <e p="Verification.cs" t="Include" />
@@ -17,7 +18,10 @@
         </e>
         <e p="Logger.cs" t="Include" />
         <e p="Modules" t="Include">
+          <e p="Author.cs" t="Include" />
           <e p="General.cs" t="Include" />
+          <e p="Moderation.cs" t="Include" />
+          <e p="Tournament.cs" t="Include" />
         </e>
         <e p="MoguMogu.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">

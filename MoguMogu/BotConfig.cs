@@ -25,7 +25,6 @@ namespace MoguMogu
         [JsonProperty("verified_role_name")] public string RoleName { get; set; } = "177013";
         [JsonProperty("Use_MariaDB")] public bool UseMariaDB { get; set; }
         [JsonProperty("Owner_Id")] public ulong[] OwnerID { set; get; } = {634246091293851649, 154605183714852864};
-        [JsonProperty("Sheets_Id")] public string Sheets_Id { set; get; } = "177013";
         [JsonProperty("Google_Client_Id")] public string Client_Id { set; get; } = "177013";
         [JsonProperty("Google_Client_Secret")] public string Client_Secret { set; get; } = "177013";
 

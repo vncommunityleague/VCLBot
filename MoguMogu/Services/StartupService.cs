@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MoguMogu.Database;
+using MoguMogu.Database.Models;
 
 namespace MoguMogu.Services
 {
@@ -19,7 +22,16 @@ namespace MoguMogu.Services
             Discord = discord;
             _commands = commands;
             Discord.Ready += DiscordOnReady;
-            Discord.JoinedGuild += guild => guild.DefaultChannel.SendMessageAsync("Mogu mogu okayuuuuuuuuuuuuuu!");
+            Discord.JoinedGuild += DiscordOnJoinedGuild;
+        }
+
+        private async Task DiscordOnJoinedGuild(SocketGuild guild)
+        {
+            await guild.DefaultChannel.SendMessageAsync("Mogu mogu okayuuuuuuuuuuuuuu!");
+            await using var db = new DBContext();
+            if (db.Servers.FirstOrDefault(s => s.ServerId == guild.Id) == null)
+                await db.Servers.AddAsync(new Config {ServerId = guild.Id});
+            await db.SaveChangesAsync();
         }
 
         private async Task DiscordOnReady()
@@ -27,6 +39,12 @@ namespace MoguMogu.Services
             Logger.Log($"Logged as: '{Discord.CurrentUser.Username}#{Discord.CurrentUser.Discriminator}'",
                 m: "Discord");
             await Discord.SetGameAsync(BotConfig.config.BotActivity);
+            await using var db = new DBContext();
+            foreach (var guild in Discord.Guilds)
+                if (db.Servers.FirstOrDefault(s => s.ServerId == guild.Id) == null)
+                    await db.Servers.AddAsync(new Config {ServerId = guild.Id});
+
+            await db.SaveChangesAsync();
         }
 
         public async Task StartAsync()
