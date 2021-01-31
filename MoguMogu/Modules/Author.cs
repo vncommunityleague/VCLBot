@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -9,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using MoguMogu.Database;
 using OsuSharp;
+using User = MoguMogu.Database.Models.User;
 
 namespace MoguMogu.Modules
 {
@@ -47,8 +46,8 @@ namespace MoguMogu.Modules
                 await Context.Channel.SendMessageAsync($"Changed bot username to: `{username}`");
             }
         }
-        
-        
+
+
         [Command("merge")]
         [Summary("Dit me may")]
         public async Task merge(ulong role)
@@ -59,22 +58,23 @@ namespace MoguMogu.Modules
                 await using var db = new DBContext();
                 var i = 0;
                 foreach (var user in Context.Guild.Users)
-                {
-                    if (user.Roles.Any(v => v.Id == role) && db.Users.FirstOrDefault(u => u.DiscordId == user.Id) == null)
+                    if (user.Roles.Any(v => v.Id == role) &&
+                        db.Users.FirstOrDefault(u => u.DiscordId == user.Id) == null)
                         try
                         {
                             var osuUser = await _osuClient.GetUserByUsernameAsync(user.Nickname ?? user.Username,
                                 GameMode.Standard);
                             if (osuUser == null) continue;
-                            await db.Users.AddAsync(new Database.Models.User
+                            await db.Users.AddAsync(new User
                             {
                                 DiscordId = user.Id,
                                 OsuId = osuUser.UserId
                             });
                             i++;
-                        } catch {
                         }
-                }
+                        catch
+                        {
+                        }
 
                 await db.SaveChangesAsync();
                 await ReplyAsync($"Merged {i} members");

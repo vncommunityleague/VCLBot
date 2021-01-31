@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 using MoguMogu.Data;
+using MoguMogu.Database;
 using Newtonsoft.Json;
 using OsuSharp;
 using Embed = Discord.Embed;
@@ -15,7 +17,7 @@ namespace MoguMogu.SpreadSheets
 {
     public class SpreadSheet
     {
-        private static readonly string[] Scopes = {SheetsService.Scope.SpreadsheetsReadonly};
+        private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
         private static readonly SheetsService _service;
 
         static SpreadSheet()
@@ -38,7 +40,7 @@ namespace MoguMogu.SpreadSheets
             });
         }
 
-        public static Embed GetMatchEmbed(string matchId, string sheetsId)
+        public static Embed GetMatchEmbed(string matchId, string sheetsId, bool check = false)
         {
             try
             {
@@ -47,7 +49,6 @@ namespace MoguMogu.SpreadSheets
                 var values = response.Values;
 
                 /*
-                var mpLink = GetValue(values, 3, 1);
                 var blueTeam = GetValue(values, 1, 4);
                 var redTeam = GetValue(values, 1, 6);
                 var blueScore = GetValue(values, 2, 4);
@@ -60,20 +61,16 @@ namespace MoguMogu.SpreadSheets
                 var redRoll = GetValue(values, 14, 10);
                 var refName = GetRefName(matchId, sheetsId);
                 var matchTitle = $"{GetValue(values, 5, 1)} - Match {matchId}";
-                MultiplayerRoom mpRoom = null;
-                var isMatchDone = !string.IsNullOrEmpty(mpLink) &&
-                                  (mpRoom = Program.OsuClient
-                                      .GetMultiplayerRoomAsync(
-                                          long.Parse(mpLink.Substring(mpLink.LastIndexOf("/") + 1))).Result).Match
-                                  .EndTime != null;
-                if (!isMatchDone) return null;
+                
                 var builder = new EmbedBuilder().WithTitle(matchTitle).WithFooter("Refereed by " + refName)
                     .WithTimestamp(mpRoom.Match.EndTime.Value);
                 builder.AddField($":trophy: **{blueTeam} | {blueScore}** - {redScore} | {redTeam}",
                     $"-------------\nRolls: \n**{blueTeam}**: {blueRoll}\n**{redTeam}**: {redRoll}\n*{(int.Parse(blueRoll) < int.Parse(redRoll) ? redTeam : blueTeam)} chọn pick và ban sau*\n-------------\nBans:\n**{redTeam}**:\n> {redBan1}{(string.IsNullOrEmpty(redBan2) ? "" : $"\n> {redBan2}")}\n\n**{blueTeam}**:\n> {blueBan1}{(string.IsNullOrEmpty(blueBan2) ? "" : $"\n> {blueBan2}")}\n-------------\nMP Link: <{mpLink}>");
                */
-                
-                return JsonConvert.DeserializeObject<EmbedJson>(GetValue(values, 18, 8))?.Embed.GetEmbed();
+                var mpLink = GetValue(values, 3, 1);
+                var doubleCheck = GetValue(values, 18, 10).Equals("TRUE");
+                var isMatchDone = !string.IsNullOrEmpty(mpLink) && Program.OsuClient.GetMultiplayerRoomAsync(long.Parse(mpLink.Substring(mpLink.LastIndexOf("/") + 1))).Result.Match.EndTime != null;
+                return !isMatchDone || !doubleCheck && check ? null : JsonConvert.DeserializeObject<EmbedJson>(GetValue(values, 18, 8))?.Embed.GetEmbed();
             }
             catch
             {
@@ -111,7 +108,28 @@ namespace MoguMogu.SpreadSheets
                 return string.Empty;
             }
         }
-        
+
+        //bad at naming
+        public static string GetTeamMembers(string team, string sheetsId, DBContext db)
+        {
+            var response = _service.Spreadsheets.Values.Get(sheetsId, "Team Listing!B5:K").Execute();
+            var values = response.Values;
+            var list = (from t in values.Where((t, i) => GetValue(values, i, 0).ToLower().Equals(team.ToLower()))
+                from v in t.Skip(1)
+                select v.ToString()).ToList();
+
+            return list.Aggregate("", (c, m) => c + $"{(string.IsNullOrEmpty(c) ? "" : ", ")}{ResolveUsername(m, db)}");
+        }
+
+        public static string ResolveUsername(string name, DBContext db)
+        {
+            var osuClient = Program.OsuClient;
+            var oUser = osuClient.GetUserByUsernameAsync(name, GameMode.Standard).Result;
+            if (oUser == null) return string.Empty;
+            var user = db.Users.FirstOrDefault(u => u.OsuId == oUser.UserId);
+            return user == null ? $"**{oUser.Username}**" : $"**{oUser.Username}** - <@{user.DiscordId}>";
+        }
+
 
         public static IEnumerable<Match> GetMatches(string sheetsId)
         {
@@ -126,13 +144,13 @@ namespace MoguMogu.SpreadSheets
                         var row = values[i];
                         matches.Add(new Match(row[0].ToString(),
                             DateTime.ParseExact($"{row[1]} {row[2]}", "dd/MM/yyyy HH:mm",
-                                CultureInfo.InvariantCulture), GetValue(values, i, 3), GetValue(values, i, 4), GetValue(values, i, 5)));
+                                CultureInfo.InvariantCulture), GetValue(values, i, 3), GetValue(values, i, 4),
+                            GetValue(values, i, 5)));
                     }
                     catch
                     {
                         Logger.Log($"Can't parse match id {values[i][0]}", LogLevel.Error, "Sheet");
                     }
-                
             }
             catch
             {

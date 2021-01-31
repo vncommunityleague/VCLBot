@@ -3,19 +3,21 @@
 
 Bot is open-source, which means you are on your own if you want to use this for your tournament.
 
-- Credits: [Skybot](https://github.com/Blade12629/Skybot/)
+- Credits: [Skybot](https://github.com/Blade12629/Skybot/) - Irc
 
 ### Basic Bot Usage
 0. Prefix: default prefix is `*`
 
 1. User commands:
    - `*verify`: You know this.
+   - `*upcoming`: View upcoming match.
    
 2. Referee commands: 
-   - `*postresult <channel_id> <match_id>`: In case auto result posting is bugged.
+   - `*csay <channel_id> <message>`
+   - `*postresult <channel_id> <match_id>`: ~~In case auto result posting is bugged.~~ Working now :D
    
 3. Host commands (Or users with Administrator permission):
-   - `*prefix: View current prefix
+   - `*prefix`: View current prefix
    - `*config`: Including these parameters: `Enable Tournament Mode`, `Referee Role ID`, `Host Role ID`, `Spreadsheet ID`, `Verified Role Name`, `Auto Result Posting`, `Result Channel ID`, `Auto Reminder`, `Reminder Channel ID`, `Time Offset (UTC)`
      - `*config prefix <new_prefix>`
      - `*config enable_tour <true/false>`: Allowing commands below to work.
@@ -31,6 +33,6 @@ Bot is open-source, which means you are on your own if you want to use this for 
      
 4. Dev commands (_Only the creators are allowed to use these commands_):
    - `*changeactivity <new_activity>`
-   - `*changeusername <new_username>` (Limited to 4 times per day)
+   - `*changeusername <new_username>` (Limited to ~~4 times per day~~ 2 times per hour)
    - `*changeavatar <link to image>`
    - `*merge`: Merge existing verified users

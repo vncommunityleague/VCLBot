@@ -26,32 +26,60 @@ namespace MoguMogu.Schedule
                     var cfg = db.Servers.FirstOrDefault(s => s.ServerId == g.Id);
                     if (!cfg.EnableTour || string.IsNullOrEmpty(cfg.SheetsId)) continue;
                     var resultChan = (ISocketMessageChannel) g.GetChannel(cfg.ResultChannelId);
-                    var reminderChan = g.GetChannel(cfg.ReminderChannelId);
-                    if (cfg.AutoResult && resultChan != null)
+                    var reminderChan = (ISocketMessageChannel) g.GetChannel(cfg.ReminderChannelId);
+                    if (cfg.AutoReminder && reminderChan != null)
                         try
                         {
                             foreach (var match in SpreadSheet.GetMatches(cfg.SheetsId))
                             {
-                                if (db.Results.FirstOrDefault(r =>
+                                var diff = Math.Floor((match.DateTime - DateTime.UtcNow.AddHours(cfg.TimeOffset))
+                                    .TotalMinutes);
+                                if (db.Reminders.FirstOrDefault(r =>
                                     r.SheetsId.Equals(cfg.SheetsId) && r.MatchId.Equals(match.Id) &&
-                                    r.ServerId == g.Id) != null) continue;
-                                var embed = SpreadSheet.GetMatchEmbed(match.Id, cfg.SheetsId);
-                                if (embed == null) continue;
-                                resultChan.SendMessageAsync(null, false, embed).Wait();
-                                db.Results.Add(new Result
+                                    r.ServerId == g.Id) != null || !(diff <= 35) || !(diff >= 0)) continue;
+                                var teamA = SpreadSheet.GetTeamMembers(match.TeamA, cfg.SheetsId, db);
+                                var teamB = SpreadSheet.GetTeamMembers(match.TeamB, cfg.SheetsId, db);
+                                db.Reminders.Add(new Reminder
                                 {
                                     SheetsId = cfg.SheetsId,
                                     MatchId = match.Id,
                                     ServerId = g.Id
                                 });
+
                                 db.SaveChanges();
+                                reminderChan.SendMessageAsync(
+                                        $"- **Reminder**: {teamA} (**{match.TeamA}**) vs {teamB} (**{match.TeamB}**) - **Match Id:** `{match.Id}` - **Referee:** {SpreadSheet.ResolveUsername(match.Referee, db)} - **Time:** `{diff}m` left")
+                                    .Wait();
                             }
                         }
                         catch
                         {
                         }
 
-                    //TODO auto reminder
+                    if (!cfg.AutoResult || resultChan == null) continue;
+
+                    try
+                    {
+                        foreach (var match in SpreadSheet.GetMatches(cfg.SheetsId))
+                        {
+                            if (db.Results.FirstOrDefault(r =>
+                                r.SheetsId.Equals(cfg.SheetsId) && r.MatchId.Equals(match.Id) &&
+                                r.ServerId == g.Id) != null) continue;
+                            var embed = SpreadSheet.GetMatchEmbed(match.Id, cfg.SheetsId, true);
+                            if (embed == null) continue;
+                            resultChan.SendMessageAsync(null, false, embed).Wait();
+                            db.Results.Add(new Result
+                            {
+                                SheetsId = cfg.SheetsId,
+                                MatchId = match.Id,
+                                ServerId = g.Id
+                            });
+                            db.SaveChanges();
+                        }
+                    }
+                    catch
+                    {
+                    }
                 }
             }
             catch

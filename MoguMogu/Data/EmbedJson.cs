@@ -6,35 +6,33 @@ namespace MoguMogu.Data
 {
     public class EmbedJson
     {
-        [JsonProperty("content")]
-        public string Content { set; get; }
-        [JsonProperty("embed")]
-        public Embed Embed { set; get; }
+        [JsonProperty("content")] public string Content { set; get; }
+
+        [JsonProperty("embed")] public Embed Embed { set; get; }
     }
 
     public class Embed
     {
-        [JsonProperty("title")]
-        public string Title { set; get; }
-        [JsonProperty("description")]
-        public string Description { set; get; }
-        [JsonProperty("url")]
-        public string Url { set; get; }
+        [JsonProperty("title")] public string Title { set; get; }
+
+        [JsonProperty("description")] public string Description { set; get; }
+
+        [JsonProperty("url")] public string Url { set; get; }
 
         [JsonProperty("color")] public uint Color { set; get; }
-        [JsonProperty("timestamp")]
-        public string Timestamp { set; get; }
-        [JsonProperty("footer")]
-        public Footer Footer { set; get; }
-        [JsonProperty("thumbnail")]
-        public Thumbnail Thumbnail { set; get; }
-        [JsonProperty("image")]
-        public Image Image { set; get; }
-        [JsonProperty("author")]
-        public Author Author { set; get; }
-        [JsonProperty("fields")]
-        public Field[] Fields { set; get; }
-        
+
+        [JsonProperty("timestamp")] public string Timestamp { set; get; }
+
+        [JsonProperty("footer")] public Footer Footer { set; get; }
+
+        [JsonProperty("thumbnail")] public Thumbnail Thumbnail { set; get; }
+
+        [JsonProperty("image")] public Image Image { set; get; }
+
+        [JsonProperty("author")] public Author Author { set; get; }
+
+        [JsonProperty("fields")] public Field[] Fields { set; get; }
+
         public Discord.Embed GetEmbed()
         {
             var author = new EmbedAuthorBuilder
@@ -68,39 +66,36 @@ namespace MoguMogu.Data
 
     public class Footer
     {
-        [JsonProperty("icon_url")]
-        public string IconUrl { set; get; }
-        [JsonProperty("text")]
-        public string Text { set; get; }
+        [JsonProperty("icon_url")] public string IconUrl { set; get; }
+
+        [JsonProperty("text")] public string Text { set; get; }
     }
 
     public class Thumbnail
     {
-        [JsonProperty("url")]
-        public string Url { set; get; }
+        [JsonProperty("url")] public string Url { set; get; }
     }
+
     public class Image
     {
-        [JsonProperty("url")]
-        public string Url { set; get; }
+        [JsonProperty("url")] public string Url { set; get; }
     }
+
     public class Author
     {
-        [JsonProperty("name")]
-        public string Name { set; get; }
-        [JsonProperty("url")]
-        public string Url { set; get; }
-        [JsonProperty("icon_url")]
-        public string IconUrl { set; get; }
+        [JsonProperty("name")] public string Name { set; get; }
+
+        [JsonProperty("url")] public string Url { set; get; }
+
+        [JsonProperty("icon_url")] public string IconUrl { set; get; }
     }
 
     public class Field
     {
-        [JsonProperty("name")]
-        public string Name { set; get; }
-        [JsonProperty("value")]
-        public string Value { set; get; }
-        [JsonProperty("inline")]
-        public bool Inline { set; get; }
+        [JsonProperty("name")] public string Name { set; get; }
+
+        [JsonProperty("value")] public string Value { set; get; }
+
+        [JsonProperty("inline")] public bool Inline { set; get; }
     }
 }

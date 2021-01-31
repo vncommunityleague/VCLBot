@@ -62,9 +62,35 @@ namespace MoguMogu.Modules
                 });
                 await db.SaveChangesAsync();
             }
-
+            
             await ((ISocketMessageChannel) channel).SendMessageAsync(null, false, embed);
             await ReplyAsync($"<@{Context.User.Id}> Sent result!").ContinueWith(
+                async m =>
+                {
+                    await Task.Delay(7000);
+                    await m.Result.DeleteAsync();
+                });
+        }
+
+        [Command("csay", true)]
+        [Summary("Dit me may")]
+        public async Task Csay(ulong channelId, [Remainder]string message)
+        {
+            if (Context.IsPrivate) return;
+            await using var db = new DBContext();
+            var config = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
+            if (!Context.Guild.Roles.Any(a => a.Id == config.HostRoleId || a.Id == config.RefRoleId) &&
+                !((SocketGuildUser) Context.User).GuildPermissions.Administrator)
+                return;
+
+            var channel = Context.Guild.GetChannel(channelId);
+            if (channel == null || string.IsNullOrEmpty(message))
+            {
+                await ReplyAsync($"Channel ID or Message is empty!");
+                return;
+            }
+            await ((ISocketMessageChannel) channel).SendMessageAsync(message);
+            await ReplyAsync($"<@{Context.User.Id}> Sent message!").ContinueWith(
                 async m =>
                 {
                     await Task.Delay(7000);
@@ -79,19 +105,27 @@ namespace MoguMogu.Modules
             if (Context.IsPrivate) return;
             await using var db = new DBContext();
             var config = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
-            if (string.IsNullOrEmpty(config.SheetsId)) {
+            if (string.IsNullOrEmpty(config.SheetsId))
+            {
                 await ReplyAsync("Please config sheets id!");
                 return;
             }
-            var desc = SpreadSheet.GetMatches(config.SheetsId)
-                .Where(match => match.DateTime > DateTime.UtcNow.AddHours(config.TimeOffset) && match.DateTime < DateTime.UtcNow.AddDays(-1 * (int) DateTime.UtcNow.DayOfWeek + 7).AddHours(config.TimeOffset))
-                .Aggregate("", (c, match) => c + $"{(string.IsNullOrEmpty(c) ? "" : "\n")}- Match **{match.Id}**: **{match.Team1}** vs **{match.Team2}** | **Time:** `{match.DateTime:dd/MM HH:mm}` | **Referee:** `{match.Referee}`");
 
-            await ReplyAsync(null, false, new EmbedBuilder().WithTitle("Upcoming Match").WithCurrentTimestamp().WithDescription(desc).Build());
+            var desc = SpreadSheet.GetMatches(config.SheetsId)
+                .Where(match => match.DateTime > DateTime.UtcNow.AddHours(config.TimeOffset) && match.DateTime <
+                    DateTime.UtcNow.AddDays(-1 * (int) DateTime.UtcNow.DayOfWeek + 7).AddHours(config.TimeOffset))
+                .Aggregate("",
+                    (c, match) =>
+                        c +
+                        $"{(string.IsNullOrEmpty(c) ? "" : "\n")}- Match **{match.Id}**: **{match.TeamA}** vs **{match.TeamB}** | **Time:** `{match.DateTime:dd/MM HH:mm}` | **Referee:** `{match.Referee}`");
+
+            await ReplyAsync(null, false,
+                new EmbedBuilder().WithTitle("Upcoming Match").WithCurrentTimestamp().WithDescription(desc).Build());
         }
+
         [Command("embed", true)]
         [Summary("Dit me may")]
-        public async Task Embed(ulong channelId, [Remainder]string url)
+        public async Task Embed(ulong channelId, [Remainder] string url)
         {
             if (Context.IsPrivate) return;
             await using var db = new DBContext();
@@ -105,6 +139,7 @@ namespace MoguMogu.Modules
                 await ReplyAsync($"Channel ID not found! `{channelId}`");
                 return;
             }
+
             var parse = JsonConvert.DeserializeObject<EmbedJson>(new WebClient().DownloadString(url));
             await ((ISocketMessageChannel) channel).SendMessageAsync(parse.Content, false, parse.Embed.GetEmbed());
             await ReplyAsync($"<@{Context.User.Id}> Sent result!").ContinueWith(
@@ -120,16 +155,16 @@ namespace MoguMogu.Modules
         public async Task verification()
         {
             await using var db = new DBContext();
-            var config = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
-            if (!config.EnableTour) return;
             var user = db.Users.FirstOrDefault(u => u.DiscordId == Context.User.Id);
-            if (user != null)
+            if (user != null && !Context.IsPrivate)
             {
+                var cfg = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
+                if (!cfg.EnableTour) return;
                 await ReplyAsync("Bạn đã verify rồi!");
                 if (Context.IsPrivate) return;
                 var gUser = Context.Guild.GetUser(Context.User.Id);
                 var role = Context.Guild.Roles.FirstOrDefault(r => r.Name.ToLower().Equals("verified")) ??
-                           (IRole) Context.Guild.CreateRoleAsync(config.VerifyRoleName, new GuildPermissions(37084736),
+                           (IRole) Context.Guild.CreateRoleAsync(cfg.VerifyRoleName, new GuildPermissions(37084736),
                                null, false, false).Result;
                 await gUser.ModifyAsync(_177013 =>
                     _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result
@@ -166,7 +201,8 @@ namespace MoguMogu.Modules
                 crypto.GetBytes(bytes);
             }
 
-            return Regex.Replace(Guid.NewGuid().ToString("N") + Convert.ToBase64String(bytes), "[^A-Za-z0-9]", "").Substring(0, 10);
+            return Regex.Replace(Guid.NewGuid().ToString("N") + Convert.ToBase64String(bytes), "[^A-Za-z0-9]", "")
+                .Substring(0, 10);
         }
     }
 }
