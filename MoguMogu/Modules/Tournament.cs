@@ -189,8 +189,8 @@ namespace MoguMogu.Modules
                 Timestamp = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
-            await dm.SendMessageAsync(
-                $"Hướng dẫn lấy role Verify:\n1. Trong chat osu! in-game hoặc chat trên web hoặc osu! IRC, copy đoạn lệnh ở dưới và gửi cho `IntelliJ IDEA` (`/query IntelliJ_IDEA`) \n2. Chờ xác nhận.\n\n**Lưu ý:** Mã xác thực sẽ hết hạn sau 5 phút. Sau thời gian đó, bạn sẽ cần thực hiện lại quá trình verify.\n\nTrong trường hợp gặp lỗi, liên hệ `hoaq#6054` hoặc `Kinue#8888`\n\n`{BotConfig.config.IrcPrefix}verify {token}`");
+       await dm.SendMessageAsync(
+                $":flag_vn: Hướng dẫn lấy role Verify:\n1. Trong chat osu! in-game hoặc chat trên web hoặc osu! IRC, copy đoạn lệnh ở dưới và gửi cho `IntelliJ IDEA` (`/query IntelliJ_IDEA`) \n2. Chờ xác nhận.\n\n**Lưu ý:** Mã xác thực sẽ hết hạn sau 5 phút. Sau thời gian đó, bạn sẽ cần thực hiện lại quá trình verify.\n\nTrong trường hợp gặp lỗi, liên hệ `hoaq#6054` hoặc `Kinue#8888`\n\n:flag_gb: Verification process guide:\n1. Using osu! in-game / web / IRC chat, copy the verify string below and send it to `IntelliJ Idea` (For IRC users, use command `/query IntelliJ_Idea`)\n2. Just wait until you receive a confirmation message from the bot.\n\n**Notice**: Verification request will be timed out after 5 minutes of inactivity. After that, you will have to start the process again.\n\nIf you encounter any errors, please contact `hoaq#6054` or `Kinue#8888`.\n\n`{BotConfig.config.IrcPrefix}verify {token}`");
         }
 
         private static string GenUniqueString()
