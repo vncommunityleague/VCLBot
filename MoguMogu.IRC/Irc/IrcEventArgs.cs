@@ -11,6 +11,15 @@ namespace MoguMogu.IRC.Irc
 
         public string WelcomeMessage { get; }
     }
+    public class IrcUserNotFoundEventArgs : EventArgs
+    {
+        public IrcUserNotFoundEventArgs(string user)
+        {
+            User = user;
+        }
+
+        public string User { get; }
+    }
 
     public class IrcChannelTopicEventArgs : EventArgs
     {

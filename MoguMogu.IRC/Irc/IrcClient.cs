@@ -29,18 +29,14 @@ namespace MoguMogu.IRC.Irc
             Password = password;
             IPv6 = ipv6;
         }
-
-        public bool IsValid => !string.IsNullOrEmpty(Host) && Port > 0 &&
-                               !string.IsNullOrEmpty(User) &&
-                               !string.IsNullOrEmpty(Password);
-
+        
         public bool IsConnected => _client?.Connected ?? false;
 
-        public string Host { get; set; }
-        public int Port { get; set; }
-        public string User { get; set; }
-        public string Password { get; set; }
-        public bool IPv6 { get; set; }
+        public string Host { get;}
+        public int Port { get; }
+        public string User { get;}
+        public string Password { get;}
+        public bool IPv6 { get;}
 
         public void Dispose()
         {
@@ -92,7 +88,6 @@ namespace MoguMogu.IRC.Irc
                     return null;
 
                 var line = await _reader.ReadLineAsync().ConfigureAwait(true);
-
                 return line;
             }
             catch (ObjectDisposedException)
@@ -136,7 +131,7 @@ namespace MoguMogu.IRC.Irc
                 if (_writer != null)
                 {
                     await _writer.WriteLineAsync(line).ConfigureAwait(true);
-                    _writer.Flush();
+                    await _writer.FlushAsync().ConfigureAwait(true);
 
                     return true;
                 }

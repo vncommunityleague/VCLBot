@@ -34,7 +34,7 @@ namespace MoguMogu
             IRC.OnWelcomeMessageReceived += (s, e) => Logger.Log("Welcome message received", m: "Irc");
             IRC.OnPrivateMessageReceived += IrcOnOnPrivateMessageReceived;
             IRC.OnPrivateBanchoMessageReceived += (s, e) => Logger.Log($"Bancho message: {e.Message}", m: "Irc");
-            await IRC.ConnectAsync(reconnectDelay: TimeSpan.FromMinutes(60)).ConfigureAwait(false);
+            await IRC.ConnectAsync().ConfigureAwait(false);
             await IRC.LoginAsync(BotConfig.config.IrcUsername, BotConfig.config.IrcPassword).ConfigureAwait(false);
             Logger.Log("Loaded Irc", m: "Irc");
         }

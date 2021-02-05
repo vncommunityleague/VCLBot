@@ -55,7 +55,7 @@
         <e p="bin" t="ExcludeRecursive" />
         <e p="Irc" t="Include">
           <e p="IrcClient.cs" t="Include" />
-          <e p="IrcWelcomeMessageEventArgs.cs" t="Include" />
+          <e p="IrcEventArgs.cs" t="Include" />
           <e p="OsuIrcClient.cs" t="Include" />
         </e>
         <e p="MoguMogu.IRC.csproj" t="IncludeRecursive" />

@@ -11,19 +11,18 @@ namespace MoguMogu.IRC.Irc
     //https://github.com/Blade12629/Skybot/tree/master/SkyBot.Networking
     public class OsuIrcClient : IDisposable
     {
-        private readonly Stopwatch _connectedSince;
         private readonly IrcClient _irc;
-        protected string _lastNick;
+        private string _lastNick;
         private string _lastPass;
-        private TimeSpan? _reconnectDelay;
+        
+        private Timer _pingTimer;
+        private DateTime _lastPong = DateTime.Now;
 
-        private Timer _reconnectTimer;
 
         public OsuIrcClient(string host = "irc.ppy.sh", int port = 6667)
         {
             _irc = new IrcClient(host, port, "Mogu Mogu", "Okayuuu", false);
             _irc.OnMessageRecieved += OnRawIrcMessageReceived;
-            _connectedSince = new Stopwatch();
         }
 
         public bool IsDisposed { get; private set; }
@@ -48,32 +47,12 @@ namespace MoguMogu.IRC.Irc
         public event EventHandler<IrcMotdEventArgs> OnMotdReceived;
         public event EventHandler OnBeforeReconnect;
         public event EventHandler OnAfterReconnect;
+        public event EventHandler<IrcUserNotFoundEventArgs> OnUserNotFound;
 
         ~OsuIrcClient()
         {
             Dispose(false);
         }
-
-        private void ReconnectWatcher()
-        {
-            try
-            {
-                if (!IsConnected)
-                {
-                    ConnectAsync(false).ConfigureAwait(false).GetAwaiter().GetResult();
-                    LoginAsync(_lastNick, _lastPass).ConfigureAwait(false).GetAwaiter().GetResult();
-                    return;
-                }
-
-                if (_reconnectDelay.HasValue &&
-                    _reconnectDelay.Value.TotalMilliseconds <= _connectedSince.ElapsedMilliseconds)
-                    Reconnect();
-            }
-            catch (Exception)
-            {
-            }
-        }
-
         private void Reconnect()
         {
             OnBeforeReconnect?.Invoke(this, new EventArgs());
@@ -83,19 +62,17 @@ namespace MoguMogu.IRC.Irc
 
             while (!IsConnected)
                 Task.Delay(250).ConfigureAwait(false).GetAwaiter().GetResult();
-
-            _connectedSince.Restart();
-
+            
             OnWelcomeMessageReceived += OnReconnected;
 
             try
             {
                 LoginAsync(_lastNick, _lastPass).ConfigureAwait(false).GetAwaiter().GetResult();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 OnWelcomeMessageReceived -= OnReconnected;
-                throw ex;
+                throw;
             }
 
             void OnReconnected(object sender, EventArgs e)
@@ -104,43 +81,47 @@ namespace MoguMogu.IRC.Irc
                 {
                     OnAfterReconnect?.Invoke(this, new EventArgs());
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     OnWelcomeMessageReceived -= OnReconnected;
-                    throw ex;
+                    throw;
                 }
 
                 OnWelcomeMessageReceived -= OnReconnected;
             }
         }
 
-        /// <param name="reconnectAndRelogin">If false ignore all other parameters. Checks if we should reconnect + login</param>
-        /// <param name="reconnectDelay">Time we can stay connected until we initiate a reconnect, leave empty to not use</param>
-        /// <param name="checkConnDelay">Check if we are connected every X ms</param>
-        public async Task ConnectAsync(bool reconnectAndRelogin = true, TimeSpan? reconnectDelay = null,
-            double checkConnDelay = 500)
-        {
+
+        public async Task ConnectAsync() {
             await Task.Run(() => _irc.Connect()).ConfigureAwait(false);
             _irc.StartReadingAsync();
-
-            if (reconnectAndRelogin)
+            if (_pingTimer == null)
             {
-                _reconnectTimer = new Timer(checkConnDelay)
+                _pingTimer = new Timer(TimeSpan.FromMinutes(2).TotalMilliseconds)
                 {
                     AutoReset = true
                 };
-                _reconnectTimer.Elapsed += (s, e) => ReconnectWatcher();
-
-                _reconnectDelay = reconnectDelay;
-                _reconnectTimer.Start();
-
-                if (reconnectDelay.HasValue)
+                _pingTimer.Elapsed += (sender, args) =>
                 {
-                    if (_connectedSince?.IsRunning ?? !true)
-                        _connectedSince.Restart();
+                    if (IsConnected)
+                    {
+                        SendCommandAsync("PING", "cho.ppy.sh irc.ppy.sh").ConfigureAwait(false);
+                        var diff = Math.Floor((DateTime.Now - _lastPong).TotalMinutes);
+                        if (diff > 5)
+                        {
+                            //reconnect
+                            Reconnect();
+                            Console.WriteLine($"Last pong: {diff}m ago, reconnecting.....");
+                        }
+                    }
                     else
-                        _connectedSince.Start();
-                }
+                    {
+                        Console.WriteLine("Disconnected from server, reconnecting....");
+                        ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                        LoginAsync(_lastNick, _lastPass).ConfigureAwait(false).GetAwaiter().GetResult();
+                    }
+                };
+                _pingTimer.Start();
             }
         }
 
@@ -148,15 +129,6 @@ namespace MoguMogu.IRC.Irc
         {
             await Task.Run(() =>
             {
-                if (_connectedSince?.IsRunning ?? !true)
-                {
-                    _connectedSince.Stop();
-                    _connectedSince.Reset();
-                }
-
-                if (stopTimer)
-                    _reconnectTimer.Stop();
-
                 _irc.StopReading();
                 _irc.Disconnect();
             }).ConfigureAwait(false);
@@ -168,7 +140,7 @@ namespace MoguMogu.IRC.Irc
             {
                 await DisconnectAsync(false).ConfigureAwait(false);
                 Task.Delay(500).Wait();
-                await ConnectAsync(false).ConfigureAwait(false);
+                await ConnectAsync().ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -218,6 +190,11 @@ namespace MoguMogu.IRC.Irc
             await _irc.WriteAsync(message).ConfigureAwait(false);
         }
 
+        private void OnPong()
+        {
+            _lastPong = DateTime.Now;
+        }
+
         private void OnRawIrcMessageReceived(object sender, string e)
         {
             var msgSplit = e.Split(' ').ToList();
@@ -225,7 +202,7 @@ namespace MoguMogu.IRC.Irc
             switch (msgSplit[0].ToLower(CultureInfo.CurrentCulture))
             {
                 case "ping":
-                    OnPing();
+                    OnPing(msgSplit[1]);
                     return;
             }
 
@@ -258,6 +235,9 @@ namespace MoguMogu.IRC.Irc
                 case "part":
                     OnUserPart(msgSplit);
                     return;
+                case "401":
+                    OnNotFound(msgSplit[2]);
+                    break;
 
                 case "001": //Welcome Message
                     OnWelcomeMessage(e.Remove(0, msgSplit[0].Length + msgSplit[1].Length + msgSplit[2].Length + 3)
@@ -287,31 +267,31 @@ namespace MoguMogu.IRC.Irc
                     return;
 
                 case "pong":
-
+                    OnPong();
                     return;
                 case "301": //user busy
                     return;
 
                 case "464": //Bad authentication token (ERR_PASSWDMISMATCH) (should be the same for osu?)
                     var reInitTimer = false;
-
-                    if (_reconnectTimer?.Enabled ?? !true)
+                    if (_pingTimer?.Enabled ?? !true)
                     {
-                        _reconnectTimer.Stop();
+                        _pingTimer.Stop();
                         reInitTimer = true;
                     }
 
                     Reconnect();
 
                     if (reInitTimer)
-                        _reconnectTimer.Start();
+                        _pingTimer.Start();
+                    Console.WriteLine("Invalid User/Password (IRC)");
                     return;
             }
 
             Console.WriteLine("Unkown command: " + e);
         }
 
-        private void OnJoinMessage(List<string> msgSplit)
+        private void OnJoinMessage(IReadOnlyList<string> msgSplit)
         {
             var userAndServer = ExtractUserAndServer(msgSplit[0]);
             var parameter = msgSplit[2].TrimStart(':');
@@ -319,7 +299,7 @@ namespace MoguMogu.IRC.Irc
             OnUserJoined?.Invoke(this, new IrcJoinEventArgs(userAndServer.Item1, userAndServer.Item2, parameter));
         }
 
-        private void OnQuitMessage(List<string> msgSplit)
+        private void OnQuitMessage(IReadOnlyList<string> msgSplit)
         {
             var userAndServer = ExtractUserAndServer(msgSplit[0]);
             var parameter = msgSplit[2].TrimStart(':');
@@ -332,7 +312,7 @@ namespace MoguMogu.IRC.Irc
             OnUserQuit?.Invoke(this, new IrcQuitEventArgs(userAndServer.Item1, userAndServer.Item2, channel));
         }
 
-        private void OnModeMessage(List<string> msgSplit, string line)
+        private void OnModeMessage(IReadOnlyList<string> msgSplit, string line)
         {
             var userAndServer = ExtractUserAndServer(msgSplit[0]);
             var parameters = line.Remove(0, msgSplit[0].Length + msgSplit[1].Length + 2);
@@ -340,18 +320,18 @@ namespace MoguMogu.IRC.Irc
             OnUserMode?.Invoke(this, new IrcModeEventArgs(userAndServer.Item1, userAndServer.Item2, parameters));
         }
 
-        private void OnMessage(List<string> msgSplit, string line)
+        private void OnMessage(IReadOnlyList<string> msgSplit, string line)
         {
-            var userAndServer = ExtractUserAndServer(msgSplit[0]);
+            var (sender, server) = ExtractUserAndServer(msgSplit[0]);
 
             var isChannel = IsChannel(msgSplit[2]);
             var msg = line.Remove(0, msgSplit[0].Length + msgSplit[1].Length + msgSplit[2].Length + 3)
                 .TrimStart(':');
 
             if (isChannel)
-                OnChannelMessage(userAndServer.Item1, userAndServer.Item2, msgSplit[2], msg);
+                OnChannelMessage(sender, server, msgSplit[2], msg);
             else
-                OnPrivateMessage(userAndServer.Item1, userAndServer.Item2, msgSplit[2], msg);
+                OnPrivateMessage(sender, server, msgSplit[2], msg);
         }
 
         private void OnPrivateMessage(string sender, string server, string destUser, string message)
@@ -383,10 +363,10 @@ namespace MoguMogu.IRC.Irc
 
         private void OnUserPart(List<string> msgSplit)
         {
-            var userAndServer = ExtractUserAndServer(msgSplit[0]);
+            var (sender, server) = ExtractUserAndServer(msgSplit[0]);
             var channel = msgSplit[2].TrimStart(':');
 
-            OnUserParted?.Invoke(this, new IrcPartEventArgs(userAndServer.Item1, userAndServer.Item2, channel));
+            OnUserParted?.Invoke(this, new IrcPartEventArgs(sender, server, channel));
         }
 
         private void OnPrivateBanchoMessage(IrcPrivateMessageEventArgs message)
@@ -410,14 +390,18 @@ namespace MoguMogu.IRC.Irc
 
         private void ExtractUserAndServer(string msg, out string sender, out string server)
         {
-            var result = ExtractUserAndServer(msg);
-            sender = result.Item1;
-            server = result.Item2;
+            var (item1, item2) = ExtractUserAndServer(msg);
+            sender = item1;
+            server = item2;
         }
 
         private void OnWelcomeMessage(string msg)
         {
             OnWelcomeMessageReceived?.Invoke(this, new IrcWelcomeMessageEventArgs(msg));
+        }
+        private void OnNotFound(string user)
+        {
+            OnUserNotFound?.Invoke(this, new IrcUserNotFoundEventArgs(user));
         }
 
         private void OnChannelTopic(string msg)
@@ -430,9 +414,9 @@ namespace MoguMogu.IRC.Irc
             OnMotdReceived?.Invoke(this, new IrcMotdEventArgs(msg));
         }
 
-        private void OnPing()
+        private void OnPing(string str)
         {
-            SendCommandAsync("PONG", "cho.ppy.sh").ConfigureAwait(false);
+            SendCommandAsync("PONG", str).ConfigureAwait(false);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -445,7 +429,7 @@ namespace MoguMogu.IRC.Irc
             if (disposing)
             {
                 _irc?.Dispose();
-                _reconnectTimer?.Dispose();
+                _pingTimer?.Dispose();
             }
         }
     }

@@ -23,15 +23,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="Auto Reminder :D">
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Data/EmbedJson.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Data/EmbedJson.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Moderation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Moderation.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Schedule/AutoTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Schedule/AutoTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM__Default_Changelist_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcWelcomeMessageEventArgs.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcEventArgs.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Program.cs" afterDir="false" />
     </list>
     <list id="75917a4e-b001-44df-b093-e7c3eb4dd846" name="Revert &quot;Auto Reminder :D&quot;" comment="Revert &quot;Auto Reminder :D&quot;&#10;&#10;This reverts commit 067b267a" />
     <option name="SHOW_DIALOG" value="false" />
@@ -47,22 +45,22 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/0d/a39b6856/Color.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/AD1AF175-F8B1-405D-8B70-29001605F5E4/76/e8117fb7/MessageExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/bd/1255e05e/Task.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://diff.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/187/ModelValidator.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/43/90ee0d3c/EmbedAuthorBuilder.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/C5CF0259-C282-4AF7-8928-DBBC4B218BE1/45/9dbd0266/MySqlDbContextOptionsBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/12F/ConstructorBindingConvention.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/77D8C492-FA6C-4C49-BF37-E16E3EB6100C/1/Google.Apis.Sheets.v4.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/e3/47a789f8/Image.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/B40FEC0A-39FF-4129-BE9C-26E6A74130AC/14/a97ec48f/TcpClient.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/8e/e82cc748/02000017.il" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/95/5d2bfe3d/GuildPermissions.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://diff.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/71/e9bcb57c/Stopwatch.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/4a/2b3d63fe/Embed.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/ae/ce060b4b/OsuSharpConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/9c/cf47e438/OsuClient.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/73/55d70399/EmbedBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/fd/b006bb6b/EventHandler`1.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/7d/5056ceca/RateLimiterConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://diff.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/47/0f83855d/User.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
@@ -71,11 +69,8 @@
         <option value="$PROJECT_DIR$/MoguMogu.IRC/Class1.cs" />
         <option value="$PROJECT_DIR$/MoguMogu.Config/Class1.cs" />
         <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcWelcomeMessageEventArgs.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Logger.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Modules/Misc.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Database/Models/User.cs" />
@@ -92,7 +87,6 @@
         <option value="$PROJECT_DIR$/MoguMogu/Services/LoggingService.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Services/StartupService.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/EmbedObject.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/EmbedJson.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Modules/Moderation.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" />
@@ -110,6 +104,12 @@
         <option value="$PROJECT_DIR$/MoguMogu/Modules/General.cs" />
         <option value="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/NewOsuIrcClient.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/Logger.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcEventArgs.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" />
+        <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
       </list>
     </option>
   </component>
@@ -164,6 +164,12 @@
       <workItem from="1611942394116" duration="2242000" />
       <workItem from="1611987838979" duration="26257000" />
       <workItem from="1612017420735" duration="13272000" />
+      <workItem from="1612163920913" duration="1113000" />
+      <workItem from="1612291503040" duration="383000" />
+      <workItem from="1612427122318" duration="123000" />
+      <workItem from="1612428244412" duration="605000" />
+      <workItem from="1612429103072" duration="7509000" />
+      <workItem from="1612508229869" duration="370000" />
     </task>
     <task id="LOCAL-00001" summary="WIP LMFAO">
       <created>1611942493291</created>
@@ -222,122 +228,126 @@
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
     <state x="459" y="47" key="CommitChangelistDialog2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612127443406" />
-    <state width="1811" height="382" key="GridCell.Tab.0.bottom" timestamp="1612030294159">
+    <state width="1811" height="385" key="GridCell.Tab.0.bottom" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030294159" />
+    <state width="1811" height="385" key="GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.0.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
-    <state width="1811" height="382" key="GridCell.Tab.0.center" timestamp="1612030294158">
+    <state width="1811" height="385" key="GridCell.Tab.0.center" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030294158" />
+    <state width="1811" height="385" key="GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.0.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
-    <state width="1811" height="382" key="GridCell.Tab.0.left" timestamp="1612030294158">
+    <state width="1811" height="385" key="GridCell.Tab.0.left" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030294158" />
+    <state width="1811" height="385" key="GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.0.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
-    <state width="1811" height="382" key="GridCell.Tab.0.right" timestamp="1612030294159">
+    <state width="1811" height="385" key="GridCell.Tab.0.right" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030294159" />
+    <state width="1811" height="385" key="GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.0.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461389" />
-    <state width="1811" height="382" key="GridCell.Tab.1.bottom" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.1.bottom" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.1.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.1.center" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.1.center" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.1.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.1.left" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.1.left" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.1.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.1.right" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.1.right" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.1.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.2.bottom" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.2.bottom" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.2.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.2.center" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.2.center" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.2.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.2.left" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.2.left" timestamp="1612436616680">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616680" />
     <state width="1877" height="386" key="GridCell.Tab.2.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.2.right" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.2.right" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.2.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.3.bottom" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.3.bottom" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.3.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
-    <state width="1811" height="382" key="GridCell.Tab.3.center" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.3.center" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.3.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.3.left" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.3.left" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.3.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.3.right" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.3.right" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.3.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461096" />
-    <state width="1811" height="382" key="GridCell.Tab.4.bottom" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.4.bottom" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.4.bottom/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
-    <state width="1811" height="382" key="GridCell.Tab.4.center" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.4.center" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.4.center/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
-    <state width="1811" height="382" key="GridCell.Tab.4.left" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.4.left" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.4.left/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
-    <state width="1811" height="382" key="GridCell.Tab.4.right" timestamp="1612030293913">
+    <state width="1811" height="385" key="GridCell.Tab.4.right" timestamp="1612436616681">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state width="1811" height="382" key="GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612030293913" />
+    <state width="1811" height="385" key="GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612436616681" />
     <state width="1877" height="386" key="GridCell.Tab.4.right/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611996461097" />
     <state x="177" y="90" key="MergeDialog" timestamp="1612127474227">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
     <state x="177" y="90" key="MergeDialog/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612127474227" />
-    <state x="519" y="272" key="Rider.ProjectTemplateDialog.Size" timestamp="1611905168865">
+    <state x="519" y="272" key="Rider.ProjectTemplateDialog.Size" timestamp="1612430207964">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state x="519" y="272" key="Rider.ProjectTemplateDialog.Size/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1611905168865" />
+    <state x="519" y="272" key="Rider.ProjectTemplateDialog.Size/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612430207964" />
     <state x="519" y="269" key="Vcs.Push.Dialog.v2" timestamp="1612016056235">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
     <state x="519" y="269" key="Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612016056235" />
     <state x="2457" y="269" key="Vcs.Push.Dialog.v2/0.0.1854.1080/1920.0.1920.1080@1920.0.1920.1080" timestamp="1611942679111" />
-    <state x="744" y="450" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1612031021320">
+    <state x="744" y="450" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1612291680703">
       <screen x="0" y="0" width="1854" height="1080" />
     </state>
-    <state x="744" y="450" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612031021320" />
+    <state x="744" y="450" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612291680703" />
+    <state x="590" y="235" width="672" height="678" key="search.everywhere.popup" timestamp="1612432936655">
+      <screen x="0" y="0" width="1854" height="1080" />
+    </state>
+    <state x="590" y="235" width="672" height="678" key="search.everywhere.popup/0.0.1854.1080/1920.0.1920.1080@0.0.1854.1080" timestamp="1612432936655" />
   </component>
 </project>
