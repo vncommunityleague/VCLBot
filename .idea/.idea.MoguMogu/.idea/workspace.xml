@@ -24,12 +24,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="Auto Reminder :D">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM__Default_Changelist_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcWelcomeMessageEventArgs.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcEventArgs.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM_[Default_Changelist]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM__Default_Changelist_.xml" beforeDir="false" />
     </list>
     <list id="75917a4e-b001-44df-b093-e7c3eb4dd846" name="Revert &quot;Auto Reminder :D&quot;" comment="Revert &quot;Auto Reminder :D&quot;&#10;&#10;This reverts commit 067b267a" />
     <option name="SHOW_DIALOG" value="false" />
@@ -40,78 +37,6 @@
   <component name="Git.Settings">
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/0d/a39b6856/Color.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/AD1AF175-F8B1-405D-8B70-29001605F5E4/76/e8117fb7/MessageExtensions.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/bd/1255e05e/Task.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/187/ModelValidator.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/43/90ee0d3c/EmbedAuthorBuilder.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/C5CF0259-C282-4AF7-8928-DBBC4B218BE1/45/9dbd0266/MySqlDbContextOptionsBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C90C4F8D-DCAC-4FEC-B03E-D2292DCE52AC/12F/ConstructorBindingConvention.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/77D8C492-FA6C-4C49-BF37-E16E3EB6100C/1/Google.Apis.Sheets.v4.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/e3/47a789f8/Image.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/B40FEC0A-39FF-4129-BE9C-26E6A74130AC/14/a97ec48f/TcpClient.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/8e/e82cc748/02000017.il" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/95/5d2bfe3d/GuildPermissions.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/71/e9bcb57c/Stopwatch.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/4a/2b3d63fe/Embed.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/ae/ce060b4b/OsuSharpConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/9c/cf47e438/OsuClient.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2E593DFC-4324-4392-82E7-79652EBB8125/73/55d70399/EmbedBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F3DD31A3-D437-4D7D-9525-D887480DAE95/fd/b006bb6b/EventHandler`1.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/7d/5056ceca/RateLimiterConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CC92EFA5-5B22-473A-AA36-ECF2374C47AB/47/0f83855d/User.cs" root0="SKIP_HIGHLIGHTING" />
-  </component>
-  <component name="IdeDocumentHistory">
-    <option name="CHANGED_PATHS">
-      <list>
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Class1.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.Config/Class1.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcWelcomeMessageEventArgs.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/DBCleaner.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Modules/Misc.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/User.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Schedule.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/Pick.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/bin/Debug/netcoreapp5.0/config.json" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/ServerConfig.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Modules/Config.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Schedule/Schedule.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/BotConfig.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Utils.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Utilities/Utils.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Services/LoggingService.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Services/StartupService.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/EmbedObject.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/EmbedJson.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Modules/Moderation.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Schedule.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Schedule/CleanTask.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Schedule/IntervalTask.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Config.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/Models/Reminder.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Schedule/AutoTask.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Services/CommandHandler.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Data/EmbedJson.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Modules/General.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" />
-        <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/NewOsuIrcClient.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Logger.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcEventArgs.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" />
-        <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
-      </list>
-    </option>
   </component>
   <component name="ProjectId" id="1njYUsFxQmGaE8PJx475vYNgVnh" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -125,7 +50,7 @@
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.3005618" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -170,6 +95,7 @@
       <workItem from="1612428244412" duration="605000" />
       <workItem from="1612429103072" duration="7509000" />
       <workItem from="1612508229869" duration="370000" />
+      <workItem from="1614133016929" duration="281000" />
     </task>
     <task id="LOCAL-00001" summary="WIP LMFAO">
       <created>1611942493291</created>

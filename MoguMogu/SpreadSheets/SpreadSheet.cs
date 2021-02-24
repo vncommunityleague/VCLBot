@@ -70,7 +70,7 @@ namespace MoguMogu.SpreadSheets
                 var mpLink = GetValue(values, 3, 1);
                 var doubleCheck = GetValue(values, 18, 10).Equals("TRUE");
                 var isMatchDone = !string.IsNullOrEmpty(mpLink) && Program.OsuClient.GetMultiplayerRoomAsync(long.Parse(mpLink.Substring(mpLink.LastIndexOf("/") + 1))).Result.Match.EndTime != null;
-                return !isMatchDone || !doubleCheck && check ? null : JsonConvert.DeserializeObject<EmbedJson>(GetValue(values, 18, 8))?.Embed.GetEmbed();
+                return !isMatchDone || !doubleCheck && check ? null : JsonConvert.DeserializeObject<EmbedJson>(GetValue(values, 13, 8))?.Embed.GetEmbed();
             }
             catch
             {
