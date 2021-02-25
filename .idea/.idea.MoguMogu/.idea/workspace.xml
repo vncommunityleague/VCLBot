@@ -24,9 +24,8 @@
   <component name="ChangeListManager">
     <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="Auto Reminder :D">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM_[Default_Changelist]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/shelf/Uncommitted_changes_before_Update_at_1_30_2021_3_56_PM__Default_Changelist_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" afterDir="false" />
     </list>
     <list id="75917a4e-b001-44df-b093-e7c3eb4dd846" name="Revert &quot;Auto Reminder :D&quot;" comment="Revert &quot;Auto Reminder :D&quot;&#10;&#10;This reverts commit 067b267a" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,6 +36,11 @@
   <component name="Git.Settings">
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <changedPaths>
+      <option value="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" />
+    </changedPaths>
   </component>
   <component name="ProjectId" id="1njYUsFxQmGaE8PJx475vYNgVnh" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -96,6 +100,7 @@
       <workItem from="1612429103072" duration="7509000" />
       <workItem from="1612508229869" duration="370000" />
       <workItem from="1614133016929" duration="281000" />
+      <workItem from="1614214340282" duration="959000" />
     </task>
     <task id="LOCAL-00001" summary="WIP LMFAO">
       <created>1611942493291</created>

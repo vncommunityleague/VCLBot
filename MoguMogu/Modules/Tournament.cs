@@ -13,6 +13,7 @@ using MoguMogu.Database.Models;
 using MoguMogu.SpreadSheets;
 using Newtonsoft.Json;
 using OsuSharp;
+using User = MoguMogu.Database.Models.User;
 
 namespace MoguMogu.Modules
 {
@@ -71,6 +72,45 @@ namespace MoguMogu.Modules
                     await m.Result.DeleteAsync();
                 });
         }
+
+        [Command("sync", true)]
+        [Summary("Dit me may")]
+        public async Task Sync(string id)
+        {
+            if (Context.IsPrivate) return;
+            await using var db = new DBContext();
+            var cfg = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
+            if (!Context.Guild.Roles.Any(a => a.Id == cfg.HostRoleId || a.Id == cfg.RefRoleId) &&
+                !((SocketGuildUser) Context.User).GuildPermissions.Administrator)
+                return;
+            if (id.ToLower().Equals("all"))
+            {
+                foreach (var gUser in Context.Guild.Users) {
+                    var user = db.Users.FirstOrDefault(u => u.DiscordId == gUser.Id);
+                    if (user == null) continue;
+                    await blahzzz(gUser, user, cfg);
+                }
+                
+                await ReplyAsync($"<@{Context.User.Id}> Done!");
+            } else if (!string.IsNullOrEmpty(id)) {
+                if (!ulong.TryParse(id, out var uid)) {
+                    await ReplyAsync($"<@{Context.User.Id}> Invalid user id!");
+                    return;
+                }
+
+                var gUser = Context.Guild.GetUser(uid);
+                var user = db.Users.FirstOrDefault(u => u.DiscordId == uid);
+                if (gUser == null || user == null) {
+                    await ReplyAsync($"<@{Context.User.Id}> User not found!!");
+                    return;
+                }
+
+                await blahzzz(gUser, user, cfg);
+                await ReplyAsync($"<@{Context.User.Id}> Done!");
+            }
+        }
+        
+        
 
         [Command("csay", true)]
         [Summary("Dit me may")]
@@ -152,7 +192,7 @@ namespace MoguMogu.Modules
 
         [Command("verify", true)]
         [Alias("verification")]
-        public async Task verification()
+        public async Task Verification()
         {
             await using var db = new DBContext();
             var user = db.Users.FirstOrDefault(u => u.DiscordId == Context.User.Id);
@@ -163,13 +203,7 @@ namespace MoguMogu.Modules
                 await ReplyAsync("Bạn đã verify rồi!");
                 if (Context.IsPrivate) return;
                 var gUser = Context.Guild.GetUser(Context.User.Id);
-                var role = Context.Guild.Roles.FirstOrDefault(r => r.Name.ToLower().Equals("verified")) ??
-                           (IRole) Context.Guild.CreateRoleAsync(cfg.VerifyRoleName, new GuildPermissions(37084736),
-                               null, false, false).Result;
-                await gUser.ModifyAsync(_177013 =>
-                    _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result
-                        .Username);
-                await gUser.AddRoleAsync(role);
+                await blahzzz(gUser, user, cfg);
                 return;
             }
 
@@ -191,6 +225,22 @@ namespace MoguMogu.Modules
             await db.SaveChangesAsync();
        await dm.SendMessageAsync(
                 $":flag_vn: Hướng dẫn lấy role Verify:\n1. Trong chat osu! in-game hoặc chat trên web hoặc osu! IRC, copy đoạn lệnh ở dưới và gửi cho `IntelliJ IDEA` (`/query IntelliJ_IDEA`) \n2. Chờ xác nhận.\n\n**Lưu ý:** Mã xác thực sẽ hết hạn sau 5 phút. Sau thời gian đó, bạn sẽ cần thực hiện lại quá trình verify.\n\nTrong trường hợp gặp lỗi, liên hệ `hoaq#6054` hoặc `Kinue#8888`\n\n:flag_gb: Verification process guide:\n1. Using osu! in-game / web / IRC chat, copy the verify string below and send it to `IntelliJ Idea` (For IRC users, use command `/query IntelliJ_Idea`)\n2. Just wait until you receive a confirmation message from the bot.\n\n**Notice**: Verification request will be timed out after 5 minutes of inactivity. After that, you will have to start the process again.\n\nIf you encounter any errors, please contact `hoaq#6054` or `Kinue#8888`.\n\n`{BotConfig.config.IrcPrefix}verify {token}`");
+        }
+        // ? name died brain
+        private async Task blahzzz(IGuildUser gUser, User user, Config cfg)
+        {
+            if (gUser == null)
+            {
+                await ReplyAsync("User not found!");
+                return;
+            }
+            var role = Context.Guild.Roles.FirstOrDefault(r => r.Name.ToLower().Equals("verified")) ??
+                       (IRole) Context.Guild.CreateRoleAsync(cfg.VerifyRoleName, new GuildPermissions(37084736),
+                           null, false, false).Result;
+            await gUser.ModifyAsync(_177013 =>
+                _177013.Nickname = Program.OsuClient.GetUserByUserIdAsync(user.OsuId, GameMode.Standard).Result
+                    .Username);
+            await gUser.AddRoleAsync(role);
         }
 
         private static string GenUniqueString()
