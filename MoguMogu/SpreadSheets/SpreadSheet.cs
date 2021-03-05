@@ -109,43 +109,29 @@ namespace MoguMogu.SpreadSheets
             }
         }
 
-        //bad at naming
-        public static string GetTeamMembers(string team, string sheetsId, DBContext db)
-        {
-            var response = _service.Spreadsheets.Values.Get(sheetsId, "Team Listing!B5:K").Execute();
-            var values = response.Values;
-            var list = (from t in values.Where((t, i) => GetValue(values, i, 0).ToLower().Equals(team.ToLower()))
-                from v in t.Skip(1)
-                select v.ToString()).ToList();
-
-            return list.Aggregate("", (c, m) => c + $"{(string.IsNullOrEmpty(c) ? "" : ", ")}{ResolveUsername(m, db)}");
-        }
-
         public static string ResolveUsername(string name, DBContext db)
         {
             var osuClient = Program.OsuClient;
             var oUser = osuClient.GetUserByUsernameAsync(name, GameMode.Standard).Result;
             if (oUser == null) return string.Empty;
             var user = db.Users.FirstOrDefault(u => u.OsuId == oUser.UserId);
-            return user == null ? $"**{oUser.Username}**" : $"**{oUser.Username}** - <@{user.DiscordId}>";
+            return user == null ? $"`{oUser.Username}`" : $"<@{user.DiscordId}> (`{oUser.Username}`)";
         }
 
 
         public static IEnumerable<Match> GetMatches(string sheetsId)
         {
             var matches = new List<Match>();
+            var year = DateTime.Now.Year;
             try
             {
-                var response = _service.Spreadsheets.Values.Get(sheetsId, "Schedule!B5:G").Execute();
+                var response = _service.Spreadsheets.Values.Get(sheetsId, "Schedule!B6:G").Execute();
                 var values = response.Values;
                 for (var i = 0; i < values.Count; i++)
                     try
                     {
                         var row = values[i];
-                        matches.Add(new Match(row[0].ToString(),
-                            DateTime.ParseExact($"{row[1]} {row[2]}", "dd/MM/yyyy HH:mm",
-                                CultureInfo.InvariantCulture), GetValue(values, i, 3), GetValue(values, i, 4),
-                            GetValue(values, i, 5)));
+                        matches.Add(new Match(row[0].ToString(), DateTime.ParseExact($"{row[1]}/{year} {row[2]}", "ddd, dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture), GetValue(values, i, 3), GetValue(values, i, 4), GetValue(values, i, 5)));
                     }
                     catch
                     {

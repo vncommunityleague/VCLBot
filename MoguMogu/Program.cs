@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.DependencyInjection;
 using MoguMogu.Database;
 using MoguMogu.IRC.Irc;
 using MoguMogu.Services;
+using MoguMogu.SpreadSheets;
 using OsuSharp;
 using User = MoguMogu.Database.Models.User;
 

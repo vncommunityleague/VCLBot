@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using MoguMogu.Database;
 using MoguMogu.Database.Models;
@@ -37,8 +38,7 @@ namespace MoguMogu.Schedule
                                 if (db.Reminders.FirstOrDefault(r =>
                                     r.SheetsId.Equals(cfg.SheetsId) && r.MatchId.Equals(match.Id) &&
                                     r.ServerId == g.Id) != null || !(diff <= 35) || !(diff >= 0)) continue;
-                                var teamA = SpreadSheet.GetTeamMembers(match.TeamA, cfg.SheetsId, db);
-                                var teamB = SpreadSheet.GetTeamMembers(match.TeamB, cfg.SheetsId, db);
+                             
                                 db.Reminders.Add(new Reminder
                                 {
                                     SheetsId = cfg.SheetsId,
@@ -47,9 +47,8 @@ namespace MoguMogu.Schedule
                                 });
 
                                 db.SaveChanges();
-                                reminderChan.SendMessageAsync(
-                                        $"- **Reminder**: {teamA} (**{match.TeamA}**) vs {teamB} (**{match.TeamB}**) - **Match Id:** `{match.Id}` - **Referee:** {SpreadSheet.ResolveUsername(match.Referee, db)} - **Time:** `{diff}m` left")
-                                    .Wait();
+                                var builder = new EmbedBuilder().WithTitle("Match Reminder").WithDescription($"Match {match.Id}: {match.TeamA} vs {match.TeamB}\nTime: {diff} phút nữa\n\nInvite sẽ được gửi 5-10p trước thời gian bắt đầu trận đấu.");
+                                reminderChan.SendMessageAsync($"Referee: `{SpreadSheet.ResolveUsername(match.Referee, db)}`, Player: {SpreadSheet.ResolveUsername(match.TeamA, db)} vs {SpreadSheet.ResolveUsername(match.TeamB, db)}", false, builder.Build()).Wait();
                             }
                         }
                         catch
