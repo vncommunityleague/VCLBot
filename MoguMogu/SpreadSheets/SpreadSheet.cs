@@ -115,7 +115,7 @@ namespace MoguMogu.SpreadSheets
             var oUser = osuClient.GetUserByUsernameAsync(name, GameMode.Standard).Result;
             if (oUser == null) return string.Empty;
             var user = db.Users.FirstOrDefault(u => u.OsuId == oUser.UserId);
-            return user == null ? $"`{oUser.Username}`" : $"<@{user.DiscordId}> (`{oUser.Username}`)";
+            return user == null ? $"`{oUser.Username}`" : $"<@{user.DiscordId}>)";
         }
 
 

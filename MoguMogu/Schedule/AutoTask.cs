@@ -47,8 +47,8 @@ namespace MoguMogu.Schedule
                                 });
 
                                 db.SaveChanges();
-                                var builder = new EmbedBuilder().WithTitle("Match Reminder").WithDescription($"Match {match.Id}: {match.TeamA} vs {match.TeamB}\nTime: {diff} phút nữa\n\nInvite sẽ được gửi 5-10p trước thời gian bắt đầu trận đấu.");
-                                reminderChan.SendMessageAsync($"Referee: `{SpreadSheet.ResolveUsername(match.Referee, db)}`, Player: {SpreadSheet.ResolveUsername(match.TeamA, db)} vs {SpreadSheet.ResolveUsername(match.TeamB, db)}", false, builder.Build()).Wait();
+                                var builder = new EmbedBuilder().WithTitle("Match Reminder").WithDescription($"Match {match.Id}: {match.TeamA} vs {match.TeamB}\nTime: {match.DateTime.ToString("dd/mm hh:mm")}\n\n Trận đấu sẽ bắt đầu sau {diff} phút nữa.\nInvite sẽ được gửi 5-10p trước thời gian bắt đầu trận đấu.");
+                                reminderChan.SendMessageAsync($"Referee: {SpreadSheet.ResolveUsername(match.Referee, db)}, Player: {SpreadSheet.ResolveUsername(match.TeamA, db)} vs {SpreadSheet.ResolveUsername(match.TeamB, db)}", false, builder.Build()).Wait();
                             }
                         }
                         catch

@@ -23,37 +23,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0971957-474b-48de-8e6a-0f4558c85644" name="Default Changelist" comment="Auto Reminder :D">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/contentModel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MoguMogu/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcEventArgs.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/IrcEventArgs.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/Irc/OsuIrcClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.IRC/MoguMogu.IRC.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.IRC/MoguMogu.IRC.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu.sln" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/BotConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/BotConfig.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Data/EmbedJson.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Data/EmbedJson.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/DBContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/Models/Config.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/Config.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/Models/Reminder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/Reminder.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/Result.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/Models/User.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/User.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Database/Models/Verification.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Logger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Logger.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Author.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/General.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Moderation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Moderation.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/MoguMogu.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/MoguMogu.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MoguMogu/Schedule/AutoTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Schedule/AutoTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Schedule/CleanTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Schedule/CleanTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Schedule/IntervalTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Schedule/IntervalTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Services/CommandHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Services/CommandHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Services/LoggingService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Services/LoggingService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/Services/StartupService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/Services/StartupService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/Match.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <list id="75917a4e-b001-44df-b093-e7c3eb4dd846" name="Revert &quot;Auto Reminder :D&quot;" comment="Revert &quot;Auto Reminder :D&quot;&#10;&#10;This reverts commit 067b267a" />
     <option name="SHOW_DIALOG" value="false" />
@@ -70,6 +41,7 @@
       <option value="$PROJECT_DIR$/MoguMogu/Modules/Tournament.cs" />
       <option value="$PROJECT_DIR$/MoguMogu/Program.cs" />
       <option value="$PROJECT_DIR$/MoguMogu/SpreadSheets/SpreadSheet.cs" />
+      <option value="$PROJECT_DIR$/MoguMogu/Schedule/AutoTask.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1njYUsFxQmGaE8PJx475vYNgVnh" />
@@ -132,7 +104,8 @@
       <workItem from="1614133016929" duration="281000" />
       <workItem from="1614214340282" duration="959000" />
       <workItem from="1614216033105" duration="881000" />
-      <workItem from="1614906404845" duration="1213000" />
+      <workItem from="1614906404845" duration="1683000" />
+      <workItem from="1615080251497" duration="352000" />
     </task>
     <task id="LOCAL-00001" summary="WIP LMFAO">
       <created>1611942493291</created>
