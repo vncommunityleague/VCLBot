@@ -47,26 +47,6 @@ namespace MoguMogu.SpreadSheets
                 var response = _service.Spreadsheets.Values.Get(sheetsId, $"{matchId}!B1:L")
                     .Execute();
                 var values = response.Values;
-
-                /*
-                var blueTeam = GetValue(values, 1, 4);
-                var redTeam = GetValue(values, 1, 6);
-                var blueScore = GetValue(values, 2, 4);
-                var redScore = GetValue(values, 2, 6);
-                var blueBan1 = GetValue(values, 2, 9);
-                var blueBan2 = GetValue(values, 2, 10);
-                var redBan1 = GetValue(values, 3, 9);
-                var redBan2 = GetValue(values, 3, 10);
-                var blueRoll = GetValue(values, 14, 9);
-                var redRoll = GetValue(values, 14, 10);
-                var refName = GetRefName(matchId, sheetsId);
-                var matchTitle = $"{GetValue(values, 5, 1)} - Match {matchId}";
-                
-                var builder = new EmbedBuilder().WithTitle(matchTitle).WithFooter("Refereed by " + refName)
-                    .WithTimestamp(mpRoom.Match.EndTime.Value);
-                builder.AddField($":trophy: **{blueTeam} | {blueScore}** - {redScore} | {redTeam}",
-                    $"-------------\nRolls: \n**{blueTeam}**: {blueRoll}\n**{redTeam}**: {redRoll}\n*{(int.Parse(blueRoll) < int.Parse(redRoll) ? redTeam : blueTeam)} chọn pick và ban sau*\n-------------\nBans:\n**{redTeam}**:\n> {redBan1}{(string.IsNullOrEmpty(redBan2) ? "" : $"\n> {redBan2}")}\n\n**{blueTeam}**:\n> {blueBan1}{(string.IsNullOrEmpty(blueBan2) ? "" : $"\n> {blueBan2}")}\n-------------\nMP Link: <{mpLink}>");
-               */
                 var mpLink = GetValue(values, 3, 1);
                 var doubleCheck = GetValue(values, 18, 10).Equals("TRUE");
                 var isMatchDone = !string.IsNullOrEmpty(mpLink) && Program.OsuClient.GetMultiplayerRoomAsync(long.Parse(mpLink.Substring(mpLink.LastIndexOf("/") + 1))).Result.Match.EndTime != null;
@@ -115,7 +95,7 @@ namespace MoguMogu.SpreadSheets
             var oUser = osuClient.GetUserByUsernameAsync(name, GameMode.Standard).Result;
             if (oUser == null) return string.Empty;
             var user = db.Users.FirstOrDefault(u => u.OsuId == oUser.UserId);
-            return user == null ? $"`{oUser.Username}`" : $"<@{user.DiscordId}>)";
+            return user == null ? $"`{oUser.Username}`" : $"<@{user.DiscordId}>";
         }
 
 
