@@ -36,3 +36,4 @@ Bot is open-source, which means you are on your own if you want to use this for 
    - `*changeusername <new_username>` (Limited to ~~4 times per day~~ 2 times per hour)
    - `*changeavatar <link to image>`
    - `*merge`: Merge existing verified users
+   - `*sync all`: Synchronize all users in the server for Verified role
