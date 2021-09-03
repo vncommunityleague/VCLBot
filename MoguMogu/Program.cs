@@ -52,12 +52,12 @@ namespace MoguMogu
             switch (array[0].ToLower())
             {
                 case "info":
-                    IRC.SendMessageAsync(e.Sender, "Mogu mogu okayuuuuuuuuu");
+                    IRC.SendMessageAsync(e.Sender, "mogu mogu amogus");
                     break;
                 case "verify":
                     if (array.Length < 2)
                     {
-                        IRC.SendMessageAsync(e.Sender, "Please input verify token!!");
+                        IRC.SendMessageAsync(e.Sender, "Vui lòng nhập mã verify!");
                         return;
                     }
 
@@ -74,7 +74,7 @@ namespace MoguMogu
                         var verify = db.Verification.FirstOrDefault(t => t.Token.Equals(token));
                         if (verify == null)
                         {
-                            IRC.SendMessageAsync(e.Sender, "Not found your verify token!");
+                            IRC.SendMessageAsync(e.Sender, "Không tìm thấy token verify của bạn!");
                             return;
                         }
 
@@ -82,13 +82,13 @@ namespace MoguMogu
                         db.SaveChanges();
                         if (verify.Timestamp.AddMinutes(5) < DateTime.UtcNow)
                         {
-                            IRC.SendMessageAsync(e.Sender, "Token expired!");
+                            IRC.SendMessageAsync(e.Sender, "Token đã hết hạn sử dụng!");
                             return;
                         }
 
                         try
                         {
-                            IRC.SendMessageAsync(e.Sender, "Pending verification, please wait.....");
+                            IRC.SendMessageAsync(e.Sender, "Đang xác thực, vui lòng chờ...");
                             foreach (var guild in StartupService.Discord.Guilds)
                                 try
                                 {
@@ -112,12 +112,12 @@ namespace MoguMogu
                                 DiscordId = verify.DiscordId,
                                 OsuId = osuUser.UserId
                             });
-                            IRC.SendMessageAsync(e.Sender, "Verified, please check your discord!");
+                            IRC.SendMessageAsync(e.Sender, "Đã xác thực, hãy kiểm tra Discord của bạn!");
                             db.SaveChanges();
                         }
                         catch (Exception a)
                         {
-                            IRC.SendMessageAsync(e.Sender, "Error! Please try again later! " + a.Message);
+                            IRC.SendMessageAsync(e.Sender, "Đã xảy ra lỗi! Vui lòng thử lại sau. " + a.Message);
                         }
                     }
 

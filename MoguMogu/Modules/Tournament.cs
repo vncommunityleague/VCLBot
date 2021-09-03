@@ -32,7 +32,7 @@ namespace MoguMogu.Modules
 
             if (string.IsNullOrEmpty(config.SheetsId))
             {
-                await ReplyAsync("Please config sheets id!");
+                await ReplyAsync("Sheet ID not found!");
                 return;
             }
 

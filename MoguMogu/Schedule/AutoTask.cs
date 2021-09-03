@@ -12,7 +12,7 @@ namespace MoguMogu.Schedule
 {
     public class AutoTask : IntervalTask
     {
-        public AutoTask() : base(TimeSpan.FromMinutes(5))
+        public AutoTask() : base(TimeSpan.FromMinutes(1))
         {
         }
 
