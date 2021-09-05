@@ -21,7 +21,7 @@ namespace MoguMogu.Modules
     public class Tournament : ModuleBase<SocketCommandContext>
     {
         [Command("postresult")]
-        public async Task PostResult(ulong channelId, [Remainder] string matchId)
+        public async Task PostResult(string retard, [Remainder] string matchId = null)
         {
             if (Context.IsPrivate) return;
             await using var db = new DBContext();
@@ -29,14 +29,22 @@ namespace MoguMogu.Modules
             if (!Context.Guild.Roles.Any(a => a.Id == config.HostRoleId || a.Id == config.RefRoleId) &&
                 !((SocketGuildUser) Context.User).GuildPermissions.Administrator)
                 return;
-
+            
+            ulong channelId;
+            SocketGuildChannel channel;
+            if (!ulong.TryParse(retard, out channelId) || (channel = Context.Guild.GetChannel(channelId)) == null)
+            {
+                channelId = config.ResultChannelId;
+                channel = Context.Guild.GetChannel(channelId);
+                matchId = retard;
+            }
+            
             if (string.IsNullOrEmpty(config.SheetsId))
             {
                 await ReplyAsync("Sheet ID not found!");
                 return;
             }
 
-            var channel = Context.Guild.GetChannel(channelId);
             if (channel == null)
             {
                 await ReplyAsync($"Channel ID not found! `{channelId}`");
@@ -71,6 +79,25 @@ namespace MoguMogu.Modules
                     await Task.Delay(7000);
                     await m.Result.DeleteAsync();
                 });
+        }
+
+        [Command("live", true)]
+        public async Task Live()
+        {
+            if (Context.IsPrivate) return;
+            await using var db = new DBContext();
+            var config = db.Servers.FirstOrDefault(s => s.ServerId == Context.Guild.Id);
+            if (!Context.Guild.Roles.Any(a => a.Id == config.HostRoleId || a.Id == config.RefRoleId) &&
+                !((SocketGuildUser) Context.User).GuildPermissions.Administrator)
+                return;
+            if (!Context.Guild.Roles.Any(a => a.Id == config.HostRoleId || a.Id == config.StreamRoleId) &&
+                !((SocketGuildUser) Context.User).GuildPermissions.Administrator)
+                return;
+            var channel = Context.Guild.GetChannel(config.StreamChannelId);
+            if (channel == null)
+                await ReplyAsync($"Channel ID not found! `{config.StreamChannelId}`");
+            else
+                await ((ISocketMessageChannel) channel).SendMessageAsync("@here\nhttps://www.twitch.tv/vncommunityleague");
         }
 
         [Command("sync", true)]

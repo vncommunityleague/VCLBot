@@ -28,7 +28,7 @@ namespace MoguMogu.Services
 
         private async Task DiscordOnJoinedGuild(SocketGuild guild)
         {
-            await guild.DefaultChannel.SendMessageAsync("Mogu mogu okayuuuuuuuuuuuuuu!");
+            await guild.DefaultChannel.SendMessageAsync("mogu mogu amogus");
             await using var db = new DBContext();
             if (db.Servers.FirstOrDefault(s => s.ServerId == guild.Id) == null)
                 await db.Servers.AddAsync(new Config {ServerId = guild.Id});
